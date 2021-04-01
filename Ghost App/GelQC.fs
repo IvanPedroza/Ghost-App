@@ -17,7 +17,7 @@ let gelQcStart(inputParams : string list) (gelForm : string) (ghost : ExcelWorks
     let user =  Environment.UserName 
     for param in inputParams do 
 
-        let negative = listFunction "gelqc" myTools 2
+        let negative = gelsListFunction "gelqc" myTools 2
 
         let docArray = File.ReadAllBytes(gelForm)
         use _copyDoc = new MemoryStream(docArray)
@@ -26,9 +26,9 @@ let gelQcStart(inputParams : string list) (gelForm : string) (ghost : ExcelWorks
 
         let lot, csName, species, customer, geneNumber, scale, formulation, shipDate = (codesetIdentifiers param ghost)
 
-        (gelsCsInfo gelBody 2 5).Text <- lot + " " + csName
-        (gelsCsInfo gelBody 2 12).Text <- geneNumber.ToString()
-        (gelsCsInfo gelBody 2 17).Text <- scale.ToString()
+        (gelsCsInfoHeader gelBody 2 5).Text <- lot + " " + csName
+        (gelsCsInfoHeader gelBody 2 12).Text <- geneNumber.ToString()
+        (gelsCsInfoHeader gelBody 2 17).Text <- scale.ToString()
         (gelsTableFiller gelBody 0 1 2 0).Text <- negative
 
         let gelBatchRecordPath = "C:/Users/" + user + "/AppData/Local/Temp/ "+param + " Gel Batch Record" + ".docx"

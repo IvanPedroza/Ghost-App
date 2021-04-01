@@ -62,19 +62,19 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
         rqstDocument.SaveAs(rqstFormPath).Close() |> ignore
            
         //Same as above but for reagents excel doc
-        let GlLot = listFunction reagentsInput myTools 2 
-        let GlExp = listFunction reagentsInput myTools 3
-        let T4BufferLot = listFunction reagentsInput myTools 4
-        let T4BufferExpiration = listFunction reagentsInput myTools 5
-        let BF2Lot = listFunction reagentsInput myTools 6
-        let BF2Expiration = listFunction reagentsInput myTools 7
-        let ATPLot = listFunction reagentsInput myTools 8 
-        let ATPExpiration = listFunction reagentsInput myTools 9
-        let H2OLot = listFunction reagentsInput myTools 10
-        let H2OExp = listFunction reagentsInput myTools 11
-        let H2OUbd = listFunction reagentsInput myTools 12
-        let t4EnzymeLot = listFunction reagentsInput myTools 13
-        let t4EnzymeExp = listFunction reagentsInput myTools 14
+        let GlLot = ligationsListFunction reagentsInput myTools 2 
+        let GlExp = ligationsListFunction reagentsInput myTools 3
+        let T4BufferLot = ligationsListFunction reagentsInput myTools 4
+        let T4BufferExpiration = ligationsListFunction reagentsInput myTools 5
+        let BF2Lot = ligationsListFunction reagentsInput myTools 6
+        let BF2Expiration = ligationsListFunction reagentsInput myTools 7
+        let ATPLot = ligationsListFunction reagentsInput myTools 8 
+        let ATPExpiration = ligationsListFunction reagentsInput myTools 9
+        let H2OLot = ligationsListFunction reagentsInput myTools 10
+        let H2OExp = ligationsListFunction reagentsInput myTools 11
+        let H2OUbd = ligationsListFunction reagentsInput myTools 12
+        let t4EnzymeLot = ligationsListFunction reagentsInput myTools 13
+        let t4EnzymeExp = ligationsListFunction reagentsInput myTools 14
 
         //Reads in Word Doc and starts processing a copy of it
         let docArray = File.ReadAllBytes(ligationForm)
@@ -83,9 +83,9 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
         let ligationsBody = ligationDocument.MainDocumentPart.Document.Body
 
         //Find text in the docx table and assigns it string values
-        (ligationsCsInfo ligationsBody 2 2).Text <- lot + " " + csName
-        (ligationsCsInfo ligationsBody 2 9).Text <- geneNumber
-        (ligationsCsInfo ligationsBody 2 16).Text <- scale
+        (ligationsCsInfoHeader ligationsBody 2 2).Text <- lot + " " + csName
+        (ligationsCsInfoHeader ligationsBody 2 9).Text <- geneNumber
+        (ligationsCsInfoHeader ligationsBody 2 16).Text <- scale
         (ligationsTableFiller ligationsBody 0 2 2 0 0).Text <- ""
         (ligationsTableFiller ligationsBody 0 2 3 0 0).Text <- "N/A"
         (ligationsTableFiller ligationsBody 0 3 2 0 0).Text <- GlLot
@@ -104,7 +104,7 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
               
         //calculates reagent amounts and assigns calculations to the last parameter for reference
         let lastLot = inputParams.Last()
-        let lastLotScale = listFunction lastLot ghost 7
+        let lastLotScale = ligationsListFunction lastLot ghost 7
               
         if not (scale = lastLotScale) then 
             let scaling = ((scale |> float) / (lastLotScale |> float))
@@ -155,23 +155,23 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
             let atpTotal = System.Math.Round(((atpUndiluted * 100.0) / 15.0), 1)
             let atpDilutant = System.Math.Round((atpTotal - atpUndiluted), 1)
             let aliquots = (ligatorAdded + bufferAdded + bf2Added + atpAdded + waterAdded + ligaseAdded) / 8.0
-            (fillCells ligationsBody 0 30 1 7 1).Text <- atpUndiluted.ToString()
-            (fillCells ligationsBody 0 30 1 7 9).Text <- atpTotal.ToString()
-            (fillCells ligationsBody 0 30 1 10 1).Text <- atpTotal.ToString()
-            (fillCells ligationsBody 0 30 1 10 5).Text <- atpUndiluted.ToString()
-            (fillCells ligationsBody 0 30 1 10 9).Text <- atpDilutant.ToString()
+            (ligationsTableFiller ligationsBody 0 30 1 7 1).Text <- atpUndiluted.ToString()
+            (ligationsTableFiller ligationsBody 0 30 1 7 9).Text <- atpTotal.ToString()
+            (ligationsTableFiller ligationsBody 0 30 1 10 1).Text <- atpTotal.ToString()
+            (ligationsTableFiller ligationsBody 0 30 1 10 5).Text <- atpUndiluted.ToString()
+            (ligationsTableFiller ligationsBody 0 30 1 10 9).Text <- atpDilutant.ToString()
 
-            (fillCells ligationsBody 0 31 1 0 3).Text <- reactions.ToString()
-            (fillCells ligationsBody 0 31 1 1 3).Text <- ligatorAdded.ToString()
-            (fillCells ligationsBody 0 31 1 2 3).Text <- bufferAdded.ToString()
-            (fillCells ligationsBody 0 31 1 3 4).Text <- bf2Added.ToString()
-            (fillCells ligationsBody 0 31 1 4 2).Text <- atpAdded.ToString()
-            (fillCells ligationsBody 0 31 1 5 2).Text <- waterAdded.ToString()
-            (fillCells ligationsBody 0 31 1 6 2).Text <- ligaseAdded.ToString()
-            (fillCells ligationsBody 0 31 1 8 4).Text <- aliquots.ToString()
+            (ligationsTableFiller ligationsBody 0 31 1 0 3).Text <- reactions.ToString()
+            (ligationsTableFiller ligationsBody 0 31 1 1 3).Text <- ligatorAdded.ToString()
+            (ligationsTableFiller ligationsBody 0 31 1 2 3).Text <- bufferAdded.ToString()
+            (ligationsTableFiller ligationsBody 0 31 1 3 4).Text <- bf2Added.ToString()
+            (ligationsTableFiller ligationsBody 0 31 1 4 2).Text <- atpAdded.ToString()
+            (ligationsTableFiller ligationsBody 0 31 1 5 2).Text <- waterAdded.ToString()
+            (ligationsTableFiller ligationsBody 0 31 1 6 2).Text <- ligaseAdded.ToString()
+            (ligationsTableFiller ligationsBody 0 31 1 8 4).Text <- aliquots.ToString()
                 
-        (fillCells ligationsBody 0 26 1 2 2).Text <- oligo
-        (fillCells ligationsBody 0 33 1 3 2).Text <- masterMix
+        (ligationsTableFiller ligationsBody 0 26 1 2 2).Text <- oligo
+        (ligationsTableFiller ligationsBody 0 33 1 3 2).Text <- masterMix
         footnotes ligationsBody inputParams param
 
        

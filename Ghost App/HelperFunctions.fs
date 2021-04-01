@@ -26,6 +26,10 @@ let codesetIdentifiers (param : string) (sheetName : ExcelWorksheet) =
     let shipDate =  sheetName.Cells.[row, 10].Value |> string
     lot, csName, species, customer, geneNumber, scale, formulation, shipDate
 
+
+
+
+
 let rqstFormDropdowns (body : Body) paragraphIndex sdtRunIndex sdtContentRunIndex runIndex textIndex =
     let paragraph = body.Elements<Paragraph>().ElementAt(paragraphIndex)
     let sdtRun = paragraph.Elements<SdtRun>().ElementAt(sdtRunIndex)
@@ -76,8 +80,12 @@ let requestForms (body : Body) tableIndex rowIndex cellIndex paragraphIndex=
 let year = (DateTime.Now.Year.ToString())
 
 
+
+
+
+
 ////Start of ligation BR functions
-let ligationsCsInfo (body : Body) paragraphIndex runIndex =
+let ligationsCsInfoHeader (body : Body) paragraphIndex runIndex =
     let paragraph = body.Elements<Paragraph>().ElementAt(paragraphIndex)
     let run = paragraph.Elements<Run>().ElementAt(runIndex)
     let runProperties = run.Elements<RunProperties>().First()
@@ -162,7 +170,7 @@ let footnotes (body : Body) (inputParams : string list) (param : string) : unit 
             (ligationsTableFiller body 0 38 0 2 0).Text <- note
 
 //Creates empty list - finds the Excel cell location for input and deconstructs the tuple into row and column numbers
-let listFunction (item : string) (sheetName : ExcelWorksheet) columnIndex =
+let ligationsListFunction (item : string) (sheetName : ExcelWorksheet) columnIndex =
     let list = List.init 100 (fun i -> (i+1,1))
     let coordinates = List.find (fun (row,col) -> item.Equals ((string sheetName.Cells.[row,col].Value).Trim(), StringComparison.InvariantCultureIgnoreCase)) list
     let row, _colnum = coordinates
@@ -173,8 +181,13 @@ let roundupbyfive(i) : float =
     (System.Math.Ceiling(i / 5.0) * 5.0)
 
 
+
+
+
+
+
 ///gel qc specific functions
-let gelsCsInfo (body : Body) paragraphIndex runIndex =
+let gelsCsInfoHeader (body : Body) paragraphIndex runIndex =
     let paragraph = body.Elements<Paragraph>().ElementAt(paragraphIndex)
     let run = paragraph.Elements<Run>().ElementAt(runIndex)
     let runProperties = run.Elements<RunProperties>().First()
@@ -197,9 +210,33 @@ let gelsTableFiller (body : Body) tableIndex rowIndex cellIndex paragraphIndex =
     let text = run.AppendChild(new Text())
     text
 
+let gelsListFunction (item : string) (sheetName : ExcelWorksheet) columnIndex =
+    let list = List.init 100 (fun i -> (i+1,1))
+    let coordinates = List.find (fun (row,col) -> item.Equals ((string sheetName.Cells.[row,col].Value).Trim(), StringComparison.InvariantCultureIgnoreCase)) list
+    let row, _colnum = coordinates
+    let value = sheetName.Cells.[row,columnIndex].Value |> string
+    value
+
+
+
+
+
 /////GP zag specific forms
 
-let getLotNumberCellText (body : Body) tableIndex rowIndex cellIndex paragraphIndex =
+let zagCsInfoHeader (body : Body) paragraphIndex runIndex =
+    let paragraph = body.Elements<Paragraph>().ElementAt(paragraphIndex)
+    let run = paragraph.Elements<Run>().ElementAt(runIndex)
+    let text = run.AppendChild(new Text())
+    text
+
+let zagReagentsList (item : string) (sheetName : ExcelWorksheet) columnIndex =
+    let list = List.init 100 (fun i -> (i+1,1))
+    let coordinates = List.find (fun (row,col) -> item.Equals ((string sheetName.Cells.[row,col].Value).Trim(), StringComparison.InvariantCultureIgnoreCase)) list
+    let row, _colnum = coordinates
+    let value = sheetName.Cells.[row,columnIndex].Value |> string
+    value
+
+let zagLotNumberFiller (body : Body) tableIndex rowIndex cellIndex paragraphIndex =
     let lot = body.Elements<Table>().ElementAt(tableIndex)
     let tableRow = lot.Elements<TableRow>().ElementAt(rowIndex)
     let tableCell = tableRow.Elements<TableCell>().ElementAt(cellIndex)
@@ -211,13 +248,8 @@ let getLotNumberCellText (body : Body) tableIndex rowIndex cellIndex paragraphIn
     let text = run.AppendChild(new Text())
     text
 
-let getCsInfo (body : Body) paragraphIndex runIndex =
-    let paragraph = body.Elements<Paragraph>().ElementAt(paragraphIndex)
-    let run = paragraph.Elements<Run>().ElementAt(runIndex)
-    let text = run.Elements<Text>().First()
-    text
 
-let getCalculations (body : Body) tableIndex rowIndex cellIndex paragraphIndex runIndex =
+let zagCalculationsWriter (body : Body) tableIndex rowIndex cellIndex paragraphIndex runIndex =
     let calc = body.Elements<Table>().ElementAt(tableIndex)
     let calcTableRow = calc.Elements<TableRow>().ElementAt(rowIndex)
     let calcTableCell = calcTableRow.Elements<TableCell>().ElementAt(cellIndex)
@@ -226,7 +258,7 @@ let getCalculations (body : Body) tableIndex rowIndex cellIndex paragraphIndex r
     let calcText = calcRun.AppendChild(new Text())
     calcText
 
-let getFootNote (body : Body) tableIndex rowIndex cellIndex paragraphIndex runIndex =
+let writeFootNote (body : Body) tableIndex rowIndex cellIndex paragraphIndex runIndex =
     let table = body.Elements<Table>().ElementAt(tableIndex)
     let row = table.Elements<TableRow>().ElementAt(rowIndex)
     let cell = row.Elements<TableCell>().ElementAt(cellIndex)
@@ -238,7 +270,7 @@ let getFootNote (body : Body) tableIndex rowIndex cellIndex paragraphIndex runIn
     let text = run.AppendChild(new Text())
     text
 
-let calNote (body : Body) (inputParams : string list) (param : string) : unit =
+let zagNote (body : Body) (inputParams : string list) (param : string) : unit =
     let firstLot = inputParams.[0]
 
     let table = body.Elements<Table>().ElementAt(1)
@@ -259,32 +291,39 @@ let calNote (body : Body) (inputParams : string list) (param : string) : unit =
         let otherNote = "① Calculations are on " + firstLot.ToUpper() + "."
         text.Text <- otherNote
 
+
+
+
+
 //////purification form specific functions 
 
-//let getCsInfo (body : Body) paragraphIndex runIndex =
-//    let paragraph = body.Elements<Paragraph>().ElementAt(paragraphIndex)
-//    let run = paragraph.Elements<Run>().ElementAt(runIndex)
-//    let runProperties = run.Elements<RunProperties>().First()
-//    let underline = runProperties.AppendChild<Underline>(new Underline(Val = EnumValue<UnderlineValues>DocumentFormat.OpenXml.Wordprocessing.UnderlineValues.Single))
-//    let position = runProperties.AppendChild<Position>(new Position(Val = StringValue("2")))
-//    run.Elements<RunProperties>().Equals(underline) |>ignore
-//    run.Elements<RunProperties>().Equals(position) |> ignore
-//    let text = run.AppendChild(new Text())
-//    text
+let purificationCsInfoHeader (body : Body) paragraphIndex runIndex =
+    let paragraph = body.Elements<Paragraph>().ElementAt(paragraphIndex)
+    let run = paragraph.Elements<Run>().ElementAt(runIndex)
+    let runProperties = run.Elements<RunProperties>().First()
+    let underline = runProperties.AppendChild<Underline>(new Underline(Val = EnumValue<UnderlineValues>DocumentFormat.OpenXml.Wordprocessing.UnderlineValues.Single))
+    let position = runProperties.AppendChild<Position>(new Position(Val = StringValue("2")))
+    run.Elements<RunProperties>().Equals(underline) |>ignore
+    run.Elements<RunProperties>().Equals(position) |> ignore
+    let text = run.AppendChild(new Text())
+    text
 
-let tempFunction (body : Body) tableIndex tableRowIndex tableCellIndex paragraphIndex runIndex = 
+let writingCalculations (body : Body) tableIndex tableRowIndex tableCellIndex paragraphIndex runIndex = 
     let table = body.Elements<Table>().ElementAt(tableIndex)
     let row = table.Elements<TableRow>().ElementAt(tableRowIndex)
     let cell = row.Elements<TableCell>().ElementAt(tableCellIndex)
     let paragraph = cell.Elements<Paragraph>().ElementAt(paragraphIndex)
     let run = paragraph.Elements<Run>().ElementAt(runIndex)
     let runProperties = run.AppendChild(new RunProperties())
+    let underline = runProperties.AppendChild<Underline>(new Underline(Val = EnumValue<UnderlineValues>DocumentFormat.OpenXml.Wordprocessing.UnderlineValues.Single))
+    run.Elements<RunProperties>().Equals(underline) |>ignore 
     let fontSize = runProperties.AppendChild<FontSize>(new FontSize(Val = StringValue("18")))
     run.Elements<RunProperties>().Equals(fontSize) |> ignore
     let text = run.AppendChild(new Text())
     text
 
-let fillCells (body : Body) tableIndex tableRowIndex tableCellIndex paragraphIndex runIndex = 
+
+let fillingPurificationLots (body : Body) tableIndex tableRowIndex tableCellIndex paragraphIndex runIndex = 
     let table = body.Elements<Table>().ElementAt(tableIndex)
     let row = table.Elements<TableRow>().ElementAt(tableRowIndex)
     let cell = row.Elements<TableCell>().ElementAt(tableCellIndex)
@@ -299,20 +338,18 @@ let fillCells (body : Body) tableIndex tableRowIndex tableCellIndex paragraphInd
     else
         let run = paragraph.Elements<Run>().ElementAt(runIndex)
         let runProperties = run.AppendChild(new RunProperties())
-        let underline = runProperties.AppendChild<Underline>(new Underline(Val = EnumValue<UnderlineValues>DocumentFormat.OpenXml.Wordprocessing.UnderlineValues.Single))
-        run.Elements<RunProperties>().Equals(underline) |>ignore 
         let fontSize = runProperties.AppendChild<FontSize>(new FontSize(Val = StringValue("18")))
         run.Elements<RunProperties>().Equals(fontSize) |> ignore
         let text = run.AppendChild(new Text())
         text
 
 //Creates empty list and finds thje Excel cell location for input and deconstructs the tuple into row and column numbers
-//let listFunction (item : string) (sheetName : ExcelWorksheet) columnIndex =
-//    let list = List.init 1000000 (fun i -> (i+1,1)) 
-//    let coordinates = List.find (fun (row,col) -> item.Equals((string sheetName.Cells.[row,col].Value).Trim(), StringComparison.InvariantCultureIgnoreCase)) list
-//    let row, _colnum = coordinates
-//    let value = sheetName.Cells.[row,columnIndex].Value |> string
-//    value
+let purificationReagentsList (item : string) (sheetName : ExcelWorksheet) columnIndex =
+    let list = List.init 1000000 (fun i -> (i+1,1)) 
+    let coordinates = List.find (fun (row,col) -> item.Equals((string sheetName.Cells.[row,col].Value).Trim(), StringComparison.InvariantCultureIgnoreCase)) list
+    let row, _colnum = coordinates
+    let value = sheetName.Cells.[row,columnIndex].Value |> string
+    value
 let theoreticalVolume (scale : float) (geneNumeber : float) : float = 
     match scale with 
         | 6.0 -> geneNumeber * 17.0

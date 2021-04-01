@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <Compile Include="HelperFunctions.fs" />
+    <Compile Include="Purifications.fs" />
+    <Compile Include="ZagQC.fs" />
     <Compile Include="GelQC.fs" />
     <Compile Include="Ligations.fs" />
     <Compile Include="Program.fs" />
