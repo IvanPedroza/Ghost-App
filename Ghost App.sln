@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31019.35
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Ghost App", "Ghost App\Ghost App.fsproj", "{7058BB5B-8EAB-4A8F-BDCD-5482A5370D39}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7058BB5B-8EAB-4A8F-BDCD-5482A5370D39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7058BB5B-8EAB-4A8F-BDCD-5482A5370D39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7058BB5B-8EAB-4A8F-BDCD-5482A5370D39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7058BB5B-8EAB-4A8F-BDCD-5482A5370D39}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {47F9415C-F589-4537-8AC5-787D7C8BBCD8}
+	EndGlobalSection
+EndGlobal
