@@ -5,18 +5,30 @@ open System
 open OfficeOpenXml
 open DocumentFormat.OpenXml
 open DocumentFormat.OpenXml.Packaging
-open DocumentFormat.OpenXml.Wordprocessing
 open System.IO
 open System.Linq
-open System.Diagnostics
-open Sentry
-open Sentry.Integrations
 open HelperFunctions
 
 
 let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm : string) (ghost : ExcelWorksheet)(myTools : ExcelWorksheet) =
     let user =  Environment.UserName 
     let mutable myList = []   
+
+    Console.WriteLine "Which bench are you working at?"
+    let benchInput = Console.ReadLine ()
+
+
+    let p1000 = ligationsListFunction benchInput myTools 3
+    let p1000Id = ligationsListFunction benchInput myTools 4
+    let p200 = ligationsListFunction benchInput myTools 5
+    let p200Id = ligationsListFunction benchInput myTools 6
+    let p20 = ligationsListFunction benchInput myTools 7
+    let p20Id = ligationsListFunction benchInput myTools 8
+    let mcP200 = ligationsListFunction benchInput myTools 9
+    let mcP200Id = ligationsListFunction benchInput myTools 10
+    let mcP20 = ligationsListFunction benchInput myTools 11
+    let mcP20Id = ligationsListFunction benchInput myTools 12
+        
     
     for param in inputParams do
         let reagentsInput = "gpligations"

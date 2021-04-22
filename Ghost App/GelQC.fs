@@ -2,14 +2,8 @@
 
 open System
 open OfficeOpenXml
-open DocumentFormat.OpenXml
 open DocumentFormat.OpenXml.Packaging
-open DocumentFormat.OpenXml.Wordprocessing
 open System.IO
-open System.Linq
-open System.Diagnostics
-open Sentry
-open Sentry.Integrations
 open HelperFunctions
 
 

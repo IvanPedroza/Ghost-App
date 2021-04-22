@@ -3,13 +3,9 @@
 open System
 open OfficeOpenXml
 open DocumentFormat.OpenXml
-open DocumentFormat.OpenXml.Packaging
 open DocumentFormat.OpenXml.Wordprocessing
 open System.IO
 open System.Linq
-open System.Diagnostics
-open Sentry
-open Sentry.Integrations
 
 let codesetIdentifiers (param : string) (sheetName : ExcelWorksheet) =
     let list = List.init 100 (fun i -> (i+1,1))
@@ -193,6 +189,8 @@ let gelsCsInfoHeader (body : Body) paragraphIndex runIndex =
     let runProperties = run.Elements<RunProperties>().First()
     let underline = runProperties.AppendChild<Underline>(new Underline(Val = EnumValue<UnderlineValues>DocumentFormat.OpenXml.Wordprocessing.UnderlineValues.Single))
     let position = runProperties.AppendChild<Position>(new Position(Val = StringValue("4")))
+    let fontSize = runProperties.AppendChild<FontSize>(new FontSize(Val = StringValue("20")))
+    run.Elements<RunProperties>().Equals(fontSize) |> ignore
     run.Elements<RunProperties>().Equals(underline) |>ignore
     run.Elements<RunProperties>().Equals(position) |> ignore
     let text = run.AppendChild(new Text())

@@ -4,12 +4,7 @@ open System
 open OfficeOpenXml
 open DocumentFormat.OpenXml
 open DocumentFormat.OpenXml.Packaging
-open DocumentFormat.OpenXml.Wordprocessing
 open System.IO
-open System.Linq
-open System.Diagnostics
-open Sentry
-open Sentry.Integrations
 open HelperFunctions
 
 let zagStart (inputParams : string list) (zagForm : string) (ghost : ExcelWorksheet)(myTools : ExcelWorksheet) =
@@ -55,14 +50,16 @@ let zagStart (inputParams : string list) (zagForm : string) (ghost : ExcelWorksh
                     (zagCsInfoHeader zagBody 2 11).Text <- geneNumber.ToString()
                     "1 - " + totalPlates.ToString()
                 else       
-                    (zagCsInfoHeader zagBody 2 11).Text <- ((geneNumber |> float) - (96.0 * ((geneNumber |> float) / 96.0))).ToString()
+                    let qcPlateNumber = System.Math.Round((geneNumber |> float) / 96.0)
+                    let genesForQc = (96.0 * qcPlateNumber)
+                    (zagCsInfoHeader zagBody 2 11).Text <- genesForQc.ToString()
                     "1 - " + (totalPlates - 1.0).ToString()
          
 
         //CS lot identifier info and number of plates being run
         (zagCsInfoHeader zagBody 1 5).Text <- lot + " " + csName
         (zagCsInfoHeader zagBody 1 13).Text <- lotPlates
-        (zagCsInfoHeader zagBody 1 21).Text <- totalPlates |> string
+        (zagCsInfoHeader zagBody 1 20).Text <- totalPlates |> string
         (zagCsInfoHeader zagBody 2 17).Text <- geneNumber |> string
         (zagCsInfoHeader zagBody 2 21).Text <- scale |> string
 
