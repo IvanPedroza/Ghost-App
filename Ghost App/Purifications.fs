@@ -6,7 +6,7 @@ open DocumentFormat.OpenXml
 open DocumentFormat.OpenXml.Packaging
 open DocumentFormat.OpenXml.Wordprocessing
 open System.IO
-open HelperFunctions
+open PurificationHelpers
 
 
 let purificationStart (inputParams : string list) (purificationsForm : string) (ghost : ExcelWorksheet)(myTools : ExcelWorksheet) =

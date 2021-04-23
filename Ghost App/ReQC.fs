@@ -4,7 +4,7 @@ open System
 open OfficeOpenXml
 open DocumentFormat.OpenXml.Packaging
 open System.IO
-open HelperFunctions
+open ReQcHelpers
 
 
 let reQcStart(inputParams : string list) (reQcForm : string) (ghost : ExcelWorksheet)(myTools : ExcelWorksheet) =
@@ -21,7 +21,7 @@ let reQcStart(inputParams : string list) (reQcForm : string) (ghost : ExcelWorks
         use reQcDocument = WordprocessingDocument.Open(_copyDoc, true)
         let reQCBody = reQcDocument.MainDocumentPart.Document.Body
 
-        let lot, csName, species, customer, geneNumber, scale, formulation, shipDate = (codesetIdentifiers param ghost)
+        let lot, csName, geneNumber, scale = (codesetIdentifiers param ghost)
 
         (gelsCsInfoHeader reQCBody 2 3).Text <- lot + " " + csName
         (gelsCsInfoHeader reQCBody 2 8).Text <- reQcGeneNumber

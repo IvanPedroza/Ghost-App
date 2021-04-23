@@ -4,7 +4,7 @@ open System
 open OfficeOpenXml
 open DocumentFormat.OpenXml.Packaging
 open System.IO
-open HelperFunctions
+open GelHelpers
 
 
 let gelQcStart(inputParams : string list) (gelForm : string) (ghost : ExcelWorksheet)(myTools : ExcelWorksheet) =

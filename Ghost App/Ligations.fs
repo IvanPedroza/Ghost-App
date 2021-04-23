@@ -7,7 +7,7 @@ open DocumentFormat.OpenXml
 open DocumentFormat.OpenXml.Packaging
 open System.IO
 open System.Linq
-open HelperFunctions
+open LigationHelpers
 
 
 let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm : string) (ghost : ExcelWorksheet)(myTools : ExcelWorksheet) =
@@ -43,7 +43,7 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
       
         let rqstbody = rqstDocument.MainDocumentPart.Document.Body
 
-        let codesetType = HelperFunctions.determineFormulation csName formulation
+        let codesetType = determineFormulation csName formulation
        
         //Formats the shipping date 
         let formattedShipDate =
