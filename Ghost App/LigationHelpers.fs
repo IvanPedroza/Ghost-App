@@ -11,7 +11,7 @@ open System.Linq
 
 //finds ID values of cs builds in excel doc and assigns them to their respective variables
 let codesetIdentifiers (param : string) (sheetName : ExcelWorksheet) =
-    let list = List.init 100 (fun i -> (i+1,1))
+    let list = List.init sheetName.Dimension.End.Row (fun i -> (i+1,1))
     let coordinates = List.find (fun (row,col) -> param.Equals ((string sheetName.Cells.[row,col].Value).Trim(), StringComparison.InvariantCultureIgnoreCase)) list
     let row, _colnum = coordinates
 
@@ -175,11 +175,28 @@ let footnotes (body : Body) (inputParams : string list) (param : string) : unit 
 
     //Creates empty list - finds the Excel cell location for input and deconstructs the tuple into row and column numbers
 let ligationsListFunction (item : string) (sheetName : ExcelWorksheet) columnIndex =
-    let list = List.init 100 (fun i -> (i+1,1))
+    let list = List.init sheetName.Dimension.End.Row (fun i -> (i+1,1))
     let coordinates = List.find (fun (row,col) -> item.Equals ((string sheetName.Cells.[row,col].Value).Trim(), StringComparison.InvariantCultureIgnoreCase)) list
     let row, _colnum = coordinates
     let value = sheetName.Cells.[row,columnIndex].Value |> string
     value
+
+let oligoStampDateFinder (item : string) (sheetName : ExcelWorksheet) columnIndex =
+    try 
+        let list = List.init sheetName.Dimension.End.Row (fun i -> (i+1,2)) //initializes list of lenth of column 2 rows
+        let coordinates = List.find (fun (row,col) -> item.Equals ((string sheetName.Cells.[row,col].Value).Trim(), StringComparison.InvariantCultureIgnoreCase)) list
+        let row, _colnum = coordinates
+        let value = sheetName.Cells.[row,columnIndex].Text |> string
+        value
+    with 
+        |_ -> 
+            let trimmedItem = item.[1..item.Length]
+            let cReplacement = "C" + trimmedItem
+            let list = List.init sheetName.Dimension.End.Row (fun i -> (i+1,2))
+            let coordinates = List.find (fun (row,col) -> cReplacement.Equals ((string sheetName.Cells.[row,col].Value).Trim(), StringComparison.InvariantCultureIgnoreCase)) list
+            let row, _colnum = coordinates
+            let value = sheetName.Cells.[row,columnIndex].Text |> string
+            value
 
     //rounds floats by five
 let roundupbyfive(i) : float = 

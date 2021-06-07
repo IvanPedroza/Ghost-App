@@ -10,7 +10,7 @@ open System.Linq
 
 //finds ID values of cs builds in excel doc and assigns them to their respective variables
 let codesetIdentifiers (param : string) (sheetName : ExcelWorksheet) =
-    let list = List.init 100 (fun i -> (i+1,1))
+    let list = List.init sheetName.Dimension.End.Row (fun i -> (i+1,1))
     let coordinates = List.find (fun (row,col) -> param.Equals ((string sheetName.Cells.[row,col].Value).Trim(), StringComparison.InvariantCultureIgnoreCase)) list
     let row, _colnum = coordinates
 
@@ -51,7 +51,7 @@ let gelsTableFiller (body : Body) tableIndex rowIndex cellIndex paragraphIndex =
 
 //Creates empty list - finds the Excel cell location for input and deconstructs the tuple into row and column numbers
 let gelsListFunction (item : string) (sheetName : ExcelWorksheet) columnIndex =
-    let list = List.init 100 (fun i -> (i+1,1))
+    let list = List.init sheetName.Dimension.End.Row (fun i -> (i+1,1))
     let coordinates = List.find (fun (row,col) -> item.Equals ((string sheetName.Cells.[row,col].Value).Trim(), StringComparison.InvariantCultureIgnoreCase)) list
     let row, _colnum = coordinates
     let value = sheetName.Cells.[row,columnIndex].Value |> string

@@ -9,7 +9,7 @@ open System.IO
 open System.Linq
 open System.Diagnostics
 open Sentry
-open HelperFunctions
+
 
 let pathsList (user : string) (param : string) = 
     [
@@ -17,6 +17,7 @@ let pathsList (user : string) (param : string) =
     "C:/Users/" + user + "/AppData/Local/Temp/ "+param + " Ligation Batch Record" + ".docx"
     "C:/Users/" + user + "/AppData/Local/Temp/ "+param + " Gel Batch Record" + ".docx"
     "C:/Users/" + user + "/AppData/Local/Temp/ "+param + " Zag Batch Record" + ".docx"
+    "C:/Users/" + user + "/AppData/Local/Temp/ "+param + " reQC Batch Record" + ".docx"
     "C:/Users/" + user + "/AppData/Local/Temp/ "+param + " Purification Form" + ".docx"
     ]
 
@@ -24,14 +25,19 @@ let pathsList (user : string) (param : string) =
 let printDocuments (path : string) =
     let printing = new Process()
     printing.StartInfo.FileName <- path
-    printing.StartInfo.Verb <- "Print"
+    printing.StartInfo.WorkingDirectory <- "C:/Users/ipedroza/AppData/Local/Temp"
     printing.StartInfo.CreateNoWindow <- true
+    printing.StartInfo.WindowStyle <- ProcessWindowStyle.Hidden
     printing.StartInfo.UseShellExecute <- true
-    printing.EnableRaisingEvents <- true
+    printing.EnableRaisingEvents <- false
+    printing.StartInfo.Verb <- "Print"
     printing.Start() |> ignore
-    printing.WaitForExit(10000)
 
+    while (printing.HasExited = false) do
+        printing.WaitForExit(10000)
     File.Delete(path)
+    
+    
 
 [<EntryPoint>]
 let main argv =
@@ -68,6 +74,12 @@ let main argv =
     use package = new ExcelPackage (fileInfo)
     let ghost = package.Workbook.Worksheets.["Upstream - GP"]
 
+    //Reading in excel file from path on oligo sheet
+    ExcelPackage.LicenseContext <- Nullable LicenseContext.NonCommercial
+    let oligoInfo = new FileInfo("W:/Production/Probe Oligos/REMP Files/_Re-Rack Files/Rerack Status.xlsx")
+    use oligoPackage = new ExcelPackage (oligoInfo)
+    let oligoStamps = oligoPackage.Workbook.Worksheets.["CodeSet Archive"]
+
     //Reading in reagents excel book
     let reagentsInfo = new FileInfo("S:/ip/reagentsandtools.xlsx")
     use reagentsPackage = new ExcelPackage (reagentsInfo)
@@ -75,7 +87,7 @@ let main argv =
 
     //Documents
     let rqstform = "C:/Users/ipedroza/source/repos/FRM-M0206 Ghost Probe Synthesis Request.docx"
-    let ligationForm = "C:/Users/ipedroza/source/repos/Formatted Forms/FRM-M0051-11_Ghost Probe Ligation using Excess Ghost Probe Oligo.docx"
+    let ligationForm = "C:/Users/ipedroza/source/repos/FRM-M0051-11_Ghost Probe Ligation using Excess Ghost Probe Oligo.docx"
     let gelForm = "C:/Users/ipedroza/source/repos/FRM-M0217-04_RUO Gel Electrophoresis QC for Ghost Probe Ligations Batch Record.docx"
     let zagForm = "C:/Users/ipedroza/source/repos/FRM-10465-01_100-mer ZAG QC Batch Record.docx"
     let reQcForm = "C:/Users/ipedroza/source/repos/FRM-M0183-03_Ghost Probe Re-QC.docx"
@@ -88,7 +100,7 @@ let main argv =
     try
         
         if processInput.Equals("ligate", StringComparison.InvariantCultureIgnoreCase) then 
-            Ligations.ligationStart inputParams rqstform ligationForm ghost myTools
+            Ligations.ligationStart inputParams rqstform ligationForm ghost oligoStamps myTools
                
 
         elif processInput.Equals("gelqc", StringComparison.InvariantCultureIgnoreCase) then 
@@ -124,15 +136,25 @@ let main argv =
                         File.Delete(each)
                         Console.WriteLine "User Error..."
             
-    try
-        for param in inputParams do 
-            let docs = pathsList user param
-            for each in docs do 
-                if File.Exists(each) then 
-                    printDocuments each
-    with 
-        | _ -> 
-            Console.WriteLine "Unable to print documents"
+    //try
+    //    for param in inputParams do 
+    //        let docs = pathsList user param
+    //        for each in docs do 
+    //            if File.Exists(each) then 
+    //                printDocuments each
+    //            else 
+    //                ignore()
+        
+                    
+    //with 
+    //    | _ -> 
+    //        Console.WriteLine "Unable to print documents"
+    //        for param in inputParams do 
+    //            let docs = pathsList user param
+    //            for each in docs do 
+    //                if File.Exists(each) then
+    //                    File.Delete(each)
+
 
     0 // return an integer exit code
     

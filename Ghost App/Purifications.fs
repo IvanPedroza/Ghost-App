@@ -12,8 +12,8 @@ open PurificationHelpers
 let purificationStart (inputParams : string list) (purificationsForm : string) (ghost : ExcelWorksheet)(myTools : ExcelWorksheet) =
     
     let user = Environment.UserName
-    //Console.WriteLine "Which reagents will you use?"
-    let reagentsInput = "purifications" //Console.ReadLine ()
+    Console.WriteLine "Which reagents will you use?"
+    let reagentsInput = Console.ReadLine ()
 
     Console.WriteLine "What is the regen of the beads being used?"
     let regenNumber = Console.ReadLine ()
@@ -114,7 +114,7 @@ let purificationStart (inputParams : string list) (purificationsForm : string) (
 
               
             let volume = System.Math.Ceiling(theoreticalVolume (scale |> float) (geneNumber |> float))
-            let oneXVolume = System.Math.Round(((volume * 0.95) * 1.2), 1) 
+            let oneXVolume = System.Math.Round((volume * 1.2), 1) 
             let sspeVolume = System.Math.Round((oneXVolume / 20.0), 1)
             let tweenVolume = System.Math.Round((oneXVolume / 100.0), 1)
             let water = System.Math.Round((oneXVolume - volume - sspeVolume - tweenVolume), 1)

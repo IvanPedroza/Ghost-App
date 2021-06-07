@@ -10,30 +10,34 @@ open System.Linq
 open LigationHelpers
 
 
-let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm : string) (ghost : ExcelWorksheet)(myTools : ExcelWorksheet) =
+let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm : string) (ghost : ExcelWorksheet) (oligoStamps : ExcelWorksheet) (myTools : ExcelWorksheet) =
     let user =  Environment.UserName 
     let mutable myList = []   
 
     Console.WriteLine "Which bench are you working at?"
     let benchInput = Console.ReadLine ()
 
-
-    let p1000 = ligationsListFunction benchInput myTools 3
+    let pipetteCalibration = ligationsListFunction benchInput myTools 2
     let p1000Id = ligationsListFunction benchInput myTools 4
-    let p200 = ligationsListFunction benchInput myTools 5
     let p200Id = ligationsListFunction benchInput myTools 6
-    let p20 = ligationsListFunction benchInput myTools 7
     let p20Id = ligationsListFunction benchInput myTools 8
-    let mcP200 = ligationsListFunction benchInput myTools 9
-    let mcP200Id = ligationsListFunction benchInput myTools 10
-    let mcP20 = ligationsListFunction benchInput myTools 11
-    let mcP20Id = ligationsListFunction benchInput myTools 12
+    let p2Id = ligationsListFunction benchInput myTools 10
+    let p2000Id = ligationsListFunction benchInput myTools 12
+    let mc8P20Id = ligationsListFunction benchInput myTools 14
+    let mc12P20Id = ligationsListFunction benchInput myTools 16
+    let mc8P200Id = ligationsListFunction benchInput myTools 18
+    let mc12P200Id = ligationsListFunction benchInput myTools 20
+
+
         
     
     for param in inputParams do
-        let reagentsInput = "gpligations"
+
+        Console.WriteLine "Which reagents will you use?"
+        let reagentsInput = Console.ReadLine ()
 
         let lot, csName, species, customer, geneNumber, scale, formulation, shipDate = codesetIdentifiers param ghost
+        
 
         //Reads in Word Doc
         let docArray = File.ReadAllBytes(rqstForm)
@@ -88,6 +92,10 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
         let t4EnzymeLot = ligationsListFunction reagentsInput myTools 13
         let t4EnzymeExp = ligationsListFunction reagentsInput myTools 14
 
+
+
+        let oligoStampDate = oligoStampDateFinder param oligoStamps 1
+
         //Reads in Word Doc and starts processing a copy of it
         let docArray = File.ReadAllBytes(ligationForm)
         use _copyDoc = new MemoryStream(docArray)
@@ -98,7 +106,7 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
         (ligationsCsInfoHeader ligationsBody 2 2).Text <- lot + " " + csName
         (ligationsCsInfoHeader ligationsBody 2 9).Text <- geneNumber
         (ligationsCsInfoHeader ligationsBody 2 16).Text <- scale
-        (ligationsTableFiller ligationsBody 0 2 2 0 0).Text <- ""
+        (ligationsTableFiller ligationsBody 0 2 2 0 0).Text <- oligoStampDate
         (ligationsTableFiller ligationsBody 0 2 3 0 0).Text <- "N/A"
         (ligationsTableFiller ligationsBody 0 3 2 0 0).Text <- GlLot
         (ligationsTableFiller ligationsBody 0 3 3 0 0).Text <- GlExp
@@ -153,20 +161,43 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
         (ligationsTableFiller ligationsBody 0 18 1 0 1).Text <- naList.[0]
         (ligationsTableFiller ligationsBody 0 18 2 0 0).Text <- naList.[0]
 
+        let multiChannelUsed = 
+            match (scale|> float) with 
+                | scale when scale = 6.0 && (geneNumber|>int) <= 64 -> mc8P20Id
+                | scale when scale = 6.0 && (geneNumber|>int) > 64 -> mc12P20Id
+                | scale when scale > 6.0 && (geneNumber|>int) <= 64 -> mc8P200Id
+                | scale when scale > 6.0 && (geneNumber|>int) > 64 -> mc12P200Id
+
+
+        (ligationsTableFiller ligationsBody 0 20 0 0 0).Text <- multiChannelUsed
+        (ligationsTableFiller ligationsBody 0 20 1 0 0).Text <- pipetteCalibration
+        (ligationsTableFiller ligationsBody 0 21 0 0 0).Text <- p1000Id
+        (ligationsTableFiller ligationsBody 0 21 1 0 0).Text <- pipetteCalibration
+        (ligationsTableFiller ligationsBody 0 22 0 0 0).Text <- p200Id
+        (ligationsTableFiller ligationsBody 0 22 1 0 0).Text <- pipetteCalibration
+        (ligationsTableFiller ligationsBody 0 23 0 0 0).Text <- p20Id
+        (ligationsTableFiller ligationsBody 0 23 1 0 0).Text <- pipetteCalibration
+
+
         let oligo, ligator, buffer, bf2, atp, water, ligase, masterMix =   oligoStamp (scale |> float )
 
         if param = lastLot then 
             let reactions = roundupbyfive (myList.Sum() * 1.1)
-            let ligatorAdded = reactions * ligator
-            let bufferAdded = reactions * buffer 
-            let bf2Added = reactions * bf2
-            let atpAdded = System.Math.Round((reactions * atp), 2)
-            let waterAdded = reactions * water
-            let ligaseAdded = reactions * ligase
+            let ligatorAdded = System.Math.Round(reactions * ligator)
+            let bufferAdded = System.Math.Round(reactions * buffer) 
+            let bf2Added = System.Math.Round(reactions * bf2)
+            let atpAdded = System.Math.Round(reactions * atp)
+            let waterAdded = System.Math.Round(reactions * water)
+            let ligaseAdded = System.Math.Round(reactions * ligase)
             let atpUndiluted = roundupbyfive(((atpAdded * 15.0) / 100.0))
             let atpTotal = System.Math.Round(((atpUndiluted * 100.0) / 15.0), 1)
             let atpDilutant = System.Math.Round((atpTotal - atpUndiluted), 1)
-            let aliquots = (ligatorAdded + bufferAdded + bf2Added + atpAdded + waterAdded + ligaseAdded) / 8.0
+            let aliquots = System.Math.Round((ligatorAdded + bufferAdded + bf2Added + atpAdded + waterAdded + ligaseAdded) / 8.0)
+
+           
+
+
+
             (ligationsTableFiller ligationsBody 0 30 1 7 1).Text <- atpUndiluted.ToString()
             (ligationsTableFiller ligationsBody 0 30 1 7 9).Text <- atpTotal.ToString()
             (ligationsTableFiller ligationsBody 0 30 1 10 1).Text <- atpTotal.ToString()

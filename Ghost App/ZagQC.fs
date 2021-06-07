@@ -15,7 +15,9 @@ let zagStart (inputParams : string list) (zagForm : string) (ghost : ExcelWorksh
     Console.WriteLine "How many plates are you running?"
     let plateInput = Console.ReadLine() |> float
 
-    let input2 = "zagqc"
+
+    Console.WriteLine "Which reagents will you use?"
+    let reagentsInput = Console.ReadLine ()
     
     let gelVolume = (((plateInput - 1.0) * 5.0) + 20.0).ToString()
     let ureaVolume = (plateInput * 2.625).ToString()
@@ -26,13 +28,13 @@ let zagStart (inputParams : string list) (zagForm : string) (ghost : ExcelWorksh
          
         let lot, csName, species, customer, geneNumber, scale, formulation, shipDate = (codesetIdentifiers param ghost)
 
-        let gelLot = zagReagentsList input2 myTools 2 
-        let sybrLot = zagReagentsList input2 myTools 3
-        let ibLot = zagReagentsList input2 myTools 4
-        let ccLot = zagReagentsList input2 myTools 5
-        let ureaLot = zagReagentsList input2 myTools 6
-        let tenmerLot = zagReagentsList input2 myTools 7
-        let mpLot = zagReagentsList input2 myTools 8 
+        let gelLot = zagReagentsList reagentsInput myTools 2 
+        let sybrLot = zagReagentsList reagentsInput myTools 3
+        let ibLot = zagReagentsList reagentsInput myTools 4
+        let ccLot = zagReagentsList reagentsInput myTools 5
+        let ureaLot = zagReagentsList reagentsInput myTools 6
+        let tenmerLot = zagReagentsList reagentsInput myTools 7
+        let mpLot = zagReagentsList reagentsInput myTools 8 
 
         let docArray = File.ReadAllBytes(zagForm)
         use docCopy = new MemoryStream(docArray)

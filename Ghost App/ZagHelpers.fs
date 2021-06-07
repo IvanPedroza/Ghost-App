@@ -9,7 +9,7 @@ open System.Linq
 
 //finds ID values of cs builds in excel doc and assigns them to their respective variables
 let codesetIdentifiers (param : string) (sheetName : ExcelWorksheet) =
-    let list = List.init 100 (fun i -> (i+1,1))
+    let list = List.init sheetName.Dimension.End.Row (fun i -> (i+1,1))
     let coordinates = List.find (fun (row,col) -> param.Equals ((string sheetName.Cells.[row,col].Value).Trim(), StringComparison.InvariantCultureIgnoreCase)) list
     let row, _colnum = coordinates
 
@@ -27,12 +27,15 @@ let codesetIdentifiers (param : string) (sheetName : ExcelWorksheet) =
 let zagCsInfoHeader (body : Body) paragraphIndex runIndex =
     let paragraph = body.Elements<Paragraph>().ElementAt(paragraphIndex)
     let run = paragraph.Elements<Run>().ElementAt(runIndex)
+    let runProperties = run.Elements<RunProperties>().First()
+    let position = runProperties.AppendChild<Position>(new Position(Val = StringValue("4")))
+    run.Elements<RunProperties>().Equals(position) |> ignore
     let text = run.AppendChild(new Text())
     text
 
     //Creates empty list - finds the Excel cell location for input and deconstructs the tuple into row and column numbers
 let zagReagentsList (item : string) (sheetName : ExcelWorksheet) columnIndex =
-    let list = List.init 100 (fun i -> (i+1,1))
+    let list = List.init sheetName.Dimension.End.Row (fun i -> (i+1,1))
     let coordinates = List.find (fun (row,col) -> item.Equals ((string sheetName.Cells.[row,col].Value).Trim(), StringComparison.InvariantCultureIgnoreCase)) list
     let row, _colnum = coordinates
     let value = sheetName.Cells.[row,columnIndex].Value |> string
