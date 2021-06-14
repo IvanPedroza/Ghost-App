@@ -45,45 +45,53 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
     for param in inputParams do
 
         let lot, csName, species, customer, geneNumber, scale, formulation, shipDate = codesetIdentifiers param ghost
+
+        let oligo, ligator, buffer, bf2, atp, water, ligase, masterMix, rwMmVolume =   oligoStamp (scale |> float )
+
+        let lastLot = inputParams.Last()
+        let lastLotScale = ligationsListFunction lastLot ghost 7
         
 
-        //Reads in Word Doc
-        let docArray = File.ReadAllBytes(rqstForm)
-        let lengthDox = docArray.Length
-        use _copyDoc = new MemoryStream(docArray)
-        use rqstDocument = WordprocessingDocument.Open(_copyDoc, true)
+        if param.EndsWith("RW", StringComparison.InvariantCultureIgnoreCase) then 
+            ignore()
+        else
+            //Reads in Word Doc
+            let docArray = File.ReadAllBytes(rqstForm)
+            let lengthDox = docArray.Length
+            use _copyDoc = new MemoryStream(docArray)
+            use rqstDocument = WordprocessingDocument.Open(_copyDoc, true)
       
-        let rqstbody = rqstDocument.MainDocumentPart.Document.Body
+            let rqstbody = rqstDocument.MainDocumentPart.Document.Body
 
-        let codesetType = determineFormulation csName formulation
+            let codesetType = determineFormulation csName formulation
        
-        //Formats the shipping date 
-        let formattedShipDate =
-            match shipDate with 
-                | "TBD"  -> "TBD"
-                | _ -> 
-                    let firststring = shipDate.Substring(0,3)
-                    let secondstring = shipDate.Substring(3,2).ToLower()
-                    firststring + secondstring + (DateTime.Now.Year.ToString())
-
-        //Finds text for GP lot in word doc
-        (requestForms rqstbody 0 1 0 0).Text <- lot
-        (requestForms rqstbody 0 1 1 0).Text <- csName
-        (requestForms rqstbody 0 1 2 0).Text <- species
-        (requestForms rqstbody 0 1 3 0).Text <- customer
-        (requestForms rqstbody 0 1 4 0).Text <- geneNumber
-        (requestForms rqstbody 0 1 5 0).Text <- scale
-        (requestForms rqstbody 0 1 6 0).Text <- formattedShipDate
-        (rqstFormDropdowns rqstbody 1 0 0 0 0).Text <- codesetType
-        (rqstFormDropdowns rqstbody  2 0 0 0 0).Text <- formulation
+            //Formats the shipping date 
+            let formattedShipDate =
+                match shipDate with 
+                    | "TBD"  -> "TBD"
+                    | _ -> 
+                        let firststring = shipDate.Substring(0,3)
+                        let secondstring = shipDate.Substring(3,2).ToLower()
+                        firststring + secondstring + (DateTime.Now.Year.ToString())
+        
+            //Finds text for GP lot in word doc
+            (requestForms rqstbody 0 1 0 0).Text <- lot
+            (requestForms rqstbody 0 1 1 0).Text <- csName
+            (requestForms rqstbody 0 1 2 0).Text <- species
+            (requestForms rqstbody 0 1 3 0).Text <- customer
+            (requestForms rqstbody 0 1 4 0).Text <- geneNumber
+            (requestForms rqstbody 0 1 5 0).Text <- scale
+            (requestForms rqstbody 0 1 6 0).Text <- formattedShipDate
+            (rqstFormDropdowns rqstbody 1 0 0 0 0).Text <- codesetType
+            (rqstFormDropdowns rqstbody  2 0 0 0 0).Text <- formulation
    
 
-        //used to replace checked box text
-        let concentrationCheck = "☒" 
-        (rqstFormDropdowns rqstbody 12 0 0 0 0).Text <- concentrationCheck
+            //used to replace checked box text
+            let concentrationCheck = "☒" 
+            (rqstFormDropdowns rqstbody 12 0 0 0 0).Text <- concentrationCheck
 
-        let rqstFormPath = "C:/Users/" + user + "/AppData/Local/Temp/ "+param + " Request Form" + ".docx"
-        rqstDocument.SaveAs(rqstFormPath).Close() |> ignore
+            let rqstFormPath = "C:/Users/" + user + "/AppData/Local/Temp/ "+param + " Request Form" + ".docx"
+            rqstDocument.SaveAs(rqstFormPath).Close() |> ignore
            
         //Same as above but for reagents excel doc
         let GlLot = ligationsListFunction reagentsInput myTools 2 
@@ -110,9 +118,42 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
         use ligationDocument = WordprocessingDocument.Open(_copyDoc, true)
         let ligationsBody = ligationDocument.MainDocumentPart.Document.Body
 
+        
+        if param.EndsWith("RW", StringComparison.InvariantCultureIgnoreCase) then
+            Console.WriteLine ("How many reworks are you ligationg for " + param)
+            let rwNumber = Console.ReadLine ()
+
+            Console.WriteLine "What scale is the rw? 0 = 1X, 1 = 4X, 2 = 5X, 3 = 4X & 5X"
+            let rwScale = Console.ReadLine ()
+
+            let rwOligo = 
+                match rwScale with 
+                    | _ when rwScale = "0" -> oligo
+                    | _ when rwScale = "1" -> ligator * 4.0 |> string
+                    | _ when rwScale = "2" -> ligator * 5.0 |> string
+                    | _ when rwScale = "3" -> (ligator * 4.0 |> string) + "|" + (ligator * 5.0 |> string)
+
+            let mmStamp = 
+                match rwScale with 
+                    | _ when rwScale = "0" -> rwMmVolume.ToString()
+                    | _ when rwScale = "1" -> rwMmVolume * 4.0 |> string
+                    | _ when rwScale = "2" -> rwMmVolume * 5.0 |> string
+                    | _ when rwScale = "3" -> (rwMmVolume * 4.0 |> string) + "|" + (rwMmVolume * 5.0 |> string)
+
+
+            (ligationsCsInfoHeader ligationsBody 2 9).Text <- rwNumber + "/" + geneNumber
+            (ligationsTableFiller ligationsBody 0 26 1 2 2).Text <- rwOligo
+            (ligationsTableFiller ligationsBody 0 33 1 3 2).Text <- mmStamp
+
+        else
+            (ligationsCsInfoHeader ligationsBody 2 9).Text <- geneNumber
+            (ligationsTableFiller ligationsBody 0 26 1 2 2).Text <- oligo
+            (ligationsTableFiller ligationsBody 0 33 1 3 2).Text <- masterMix
+
+
         //Find text in the docx table and assigns it string values
         (ligationsCsInfoHeader ligationsBody 2 2).Text <- lot + " " + csName
-        (ligationsCsInfoHeader ligationsBody 2 9).Text <- geneNumber
+        
         (ligationsCsInfoHeader ligationsBody 2 16).Text <- scale
         (ligationsTableFiller ligationsBody 0 2 2 0 0).Text <- oligoStampDate
         (ligationsTableFiller ligationsBody 0 2 3 0 0).Text <- "N/A"
@@ -131,15 +172,17 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
         (ligationsTableFiller ligationsBody 0 8 3 0 0).Text <- t4EnzymeExp
               
         //calculates reagent amounts and assigns calculations to the last parameter for reference
-        let lastLot = inputParams.Last()
-        let lastLotScale = ligationsListFunction lastLot ghost 7
-              
-        if not (scale = lastLotScale) then 
-            let scaling = ((scale |> float) / (lastLotScale |> float))
-            let scaledGenes = (geneNumber |> float) * scaling
-            myList <- scaledGenes :: myList
-        else 
-            myList <- (geneNumber |> float) :: myList
+        
+         
+        if param.EndsWith("RW", StringComparison.InvariantCultureIgnoreCase) then
+            ignore()
+        else
+            if not (scale = lastLotScale) then 
+                let scaling = ((scale |> float) / (lastLotScale |> float))
+                let scaledGenes = (geneNumber |> float) * scaling
+                myList <- scaledGenes :: myList
+            else 
+                myList <- (geneNumber |> float) :: myList
 
         let plateTotal = System.Math.Ceiling((geneNumber |> float) / 96.0) |> int
         let iterator = [1..9]
@@ -187,8 +230,6 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
         (ligationsTableFiller ligationsBody 0 23 1 0 0).Text <- pipetteCalibration
 
 
-        let oligo, ligator, buffer, bf2, atp, water, ligase, masterMix =   oligoStamp (scale |> float )
-
         if param = lastLot then 
             let reactions = roundupbyfive (myList.Sum() * 1.1)
             let ligatorAdded = System.Math.Round(reactions * ligator)
@@ -221,8 +262,7 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
             (ligationsTableFiller ligationsBody 0 31 1 6 2).Text <- ligaseAdded.ToString()
             (ligationsTableFiller ligationsBody 0 31 1 8 4).Text <- aliquots.ToString()
                 
-        (ligationsTableFiller ligationsBody 0 26 1 2 2).Text <- oligo
-        (ligationsTableFiller ligationsBody 0 33 1 3 2).Text <- masterMix
+        
         footnotes ligationsBody inputParams param
 
        

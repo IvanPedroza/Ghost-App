@@ -29,7 +29,12 @@ let gelQcStart(inputParams : string list) (gelForm : string) (ghost : ExcelWorks
                 let genesToGel = (geneNumber|>float) - unGeledGenes
                 genesToGel.ToString() + "/" + geneNumber
             else 
-                geneNumber
+                if param.EndsWith("RW", StringComparison.InvariantCultureIgnoreCase) then 
+                    Console.WriteLine ("How many probes are you geling for " + param + "?")
+                    let genesToGel = Console.ReadLine ()
+                    genesToGel + "/" + geneNumber
+                else
+                    geneNumber
 
         (gelsCsInfoHeader gelBody 2 5).Text <- lot + " " + csName
         (gelsCsInfoHeader gelBody 2 12).Text <- totalGenesToGel
