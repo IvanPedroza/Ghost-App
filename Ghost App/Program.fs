@@ -22,10 +22,10 @@ let pathsList (user : string) (param : string) =
     ]
 
 
-let printDocuments (path : string) =
+let printDocuments (path : string) (user : string) =
     let printing = new Process()
     printing.StartInfo.FileName <- path
-    printing.StartInfo.WorkingDirectory <- "C:/Users/ipedroza/AppData/Local/Temp"
+    printing.StartInfo.WorkingDirectory <- "C:/Users/" + user + "/AppData/Local/Temp"
     printing.StartInfo.CreateNoWindow <- true
     printing.StartInfo.WindowStyle <- ProcessWindowStyle.Hidden
     printing.StartInfo.UseShellExecute <- true
@@ -55,7 +55,7 @@ let main argv =
     let processInput = Console.ReadLine ()
 
     use __ = SentrySdk.Init ( fun o ->
-           o.Dsn <-  "https://d1553cf78c164e5d9813ca11cc417d80@o561151.ingest.sentry.io/5697684"
+           o.Dsn <-  "https://e3c4cd9eb460410e89402ea524bb9922@o811036.ingest.sentry.io/5805218"
            o.SendDefaultPii <- true
            o.AttachStacktrace <- true
            o.ShutdownTimeout <- TimeSpan.FromSeconds 10.0 
@@ -86,12 +86,12 @@ let main argv =
     let myTools = reagentsPackage.Workbook.Worksheets.["tools"]
 
     //Documents
-    let rqstform = "C:/Users/ipedroza/source/repos/FRM-M0206 Ghost Probe Synthesis Request.docx"
-    let ligationForm = "C:/Users/ipedroza/source/repos/FRM-M0051-11_Ghost Probe Ligation using Excess Ghost Probe Oligo.docx"
-    let gelForm = "C:/Users/ipedroza/source/repos/FRM-M0217-04_RUO Gel Electrophoresis QC for Ghost Probe Ligations Batch Record.docx"
-    let zagForm = "C:/Users/ipedroza/source/repos/FRM-10465-01_100-mer ZAG QC Batch Record.docx"
-    let reQcForm = "C:/Users/ipedroza/source/repos/FRM-M0183-03_Ghost Probe Re-QC.docx"
-    let purificationForm = "C:/Users/ipedroza/source/repos/FRM-M0052-10 Purification of Ghost Probes with F-MODBs.docx"
+    let rqstform = "W:/program_files/FRM-M0206 Ghost Probe Synthesis Request.docx"
+    let ligationForm = "W:/program_files/FRM-M0051-11_Ghost Probe Ligation using Excess Ghost Probe Oligo.docx"
+    let gelForm = "W:/program_files/FRM-M0217-04_RUO Gel Electrophoresis QC for Ghost Probe Ligations Batch Record.docx"
+    let zagForm = "W:/program_files/FRM-10465-01_100-mer ZAG QC Batch Record.docx"
+    let reQcForm = "W:/program_files/FRM-M0183-03_Ghost Probe Re-QC.docx"
+    let purificationForm = "W:/program_files/FRM-M0052-10 Purification of Ghost Probes with F-MODBs.docx"
 
     let user = Environment.UserName
 
@@ -136,24 +136,24 @@ let main argv =
                         File.Delete(each)
                         Console.WriteLine "User Error..."
             
-    //try
-    //    for param in inputParams do 
-    //        let docs = pathsList user param
-    //        for each in docs do 
-    //            if File.Exists(each) then 
-    //                printDocuments each
-    //            else 
-    //                ignore()
+    try
+        for param in inputParams do 
+            let docs = pathsList user param
+            for each in docs do 
+                if File.Exists(each) then 
+                    printDocuments each user
+                else 
+                    ignore()
         
                     
-    //with 
-    //    | _ -> 
-    //        Console.WriteLine "Unable to print documents"
-    //        for param in inputParams do 
-    //            let docs = pathsList user param
-    //            for each in docs do 
-    //                if File.Exists(each) then
-    //                    File.Delete(each)
+    with 
+        | _ -> 
+            Console.WriteLine "Unable to print documents"
+            for param in inputParams do 
+                let docs = pathsList user param
+                for each in docs do 
+                    if File.Exists(each) then
+                        File.Delete(each)
 
 
     0 // return an integer exit code

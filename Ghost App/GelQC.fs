@@ -20,9 +20,20 @@ let gelQcStart(inputParams : string list) (gelForm : string) (ghost : ExcelWorks
 
         let lot, csName, species, customer, geneNumber, scale, formulation, shipDate = (codesetIdentifiers param ghost)
 
+
+        let plateCount = System.Math.Floor((geneNumber|>float) / 96.0)
+
+        let totalGenesToGel =
+            if plateCount > 1.0 then 
+                let unGeledGenes = 96.0 * plateCount
+                let genesToGel = (geneNumber|>float) - unGeledGenes
+                genesToGel.ToString() + "/" + geneNumber
+            else 
+                geneNumber
+
         (gelsCsInfoHeader gelBody 2 5).Text <- lot + " " + csName
-        (gelsCsInfoHeader gelBody 2 12).Text <- geneNumber.ToString()
-        (gelsCsInfoHeader gelBody 2 17).Text <- scale.ToString()
+        (gelsCsInfoHeader gelBody 2 12).Text <- totalGenesToGel
+        (gelsCsInfoHeader gelBody 2 17).Text <- scale
         (gelsTableFiller gelBody 0 1 2 0).Text <- negative
 
         let gelBatchRecordPath = "C:/Users/" + user + "/AppData/Local/Temp/ "+param + " Gel Batch Record" + ".docx"

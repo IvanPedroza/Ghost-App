@@ -55,7 +55,8 @@ let determineFormulation (csname : string) (form : string) : string =
         | csname when csname.StartsWith("PLS_CNV", StringComparison.CurrentCultureIgnoreCase)  -> "Panel/CodeSet Plus (DNA)"
         | csname when csname.StartsWith("miR", StringComparison.CurrentCultureIgnoreCase)  -> "miRNA"
         | csname when csname.StartsWith("DNA", StringComparison.CurrentCultureIgnoreCase)  -> "DNA"
-        | csname when csname.StartsWith("miX", StringComparison.CurrentCultureIgnoreCase)  -> "miRGE/miXED"
+        | csname when csname.StartsWith("mi_miX", StringComparison.CurrentCultureIgnoreCase)  -> "miRGE/miXED"
+        | csname when csname.StartsWith("gx_miX", StringComparison.CurrentCultureIgnoreCase)  -> "miRGE/miXED"
         | csname when csname.StartsWith("CHIP", StringComparison.CurrentCultureIgnoreCase)  -> "CHIP"
         | _ -> formToCodeSetType form
 

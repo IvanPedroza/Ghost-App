@@ -17,6 +17,7 @@ let purificationStart (inputParams : string list) (purificationsForm : string) (
 
     Console.WriteLine "What is the regen of the beads being used?"
     let regenNumber = Console.ReadLine ()
+    
 
     Console.WriteLine "At which bench are you working?"
     let benchId = Console.ReadLine ()
@@ -48,17 +49,25 @@ let purificationStart (inputParams : string list) (purificationsForm : string) (
             let nanoDropCalibration = purificationReagentsList  reagentsInput myTools  20
 
             //Reading from reagents sheet and looking for bench input to find pipettes associated with that bench
-            let pipetteCal = purificationReagentsList benchId myTools  2
-            let p1000 = purificationReagentsList benchId myTools  3
-            let p1000Id = purificationReagentsList benchId myTools  4
-            let p200 = purificationReagentsList benchId myTools  5
-            let p200Id = purificationReagentsList benchId myTools  6
-            let p20 = purificationReagentsList benchId myTools  7
-            let p20Id = purificationReagentsList benchId myTools  8
-            let p2000 = purificationReagentsList benchId myTools  9
-            let p2000Id = purificationReagentsList benchId myTools  10
-            let p2 = purificationReagentsList benchId myTools  11
-            let p2Id = purificationReagentsList benchId myTools  12
+            let pipetteCalibration = purificationReagentsList benchId myTools 2
+            let p1000 = purificationReagentsList benchId myTools 3
+            let p1000Id = purificationReagentsList benchId myTools 4
+            let p200 = purificationReagentsList benchId myTools 5
+            let p200Id = purificationReagentsList benchId myTools 6
+            let p100 = purificationReagentsList benchId myTools 7
+            let p100Id = purificationReagentsList benchId myTools 8
+            let p20 = purificationReagentsList benchId myTools 9
+            let p20Id = purificationReagentsList benchId myTools 10
+            let p10 = purificationReagentsList benchId myTools 11
+            let p10Id = purificationReagentsList benchId myTools 12
+            let p2 = purificationReagentsList benchId myTools 13
+            let p2Id = purificationReagentsList benchId myTools 14
+            let p2000 = purificationReagentsList benchId myTools 15
+            let p2000Id = purificationReagentsList benchId myTools 16
+            let mc8P20Id = purificationReagentsList benchId myTools 18
+            let mc12P20Id = purificationReagentsList benchId myTools 22
+            let mc8P200Id = purificationReagentsList benchId myTools 20
+            let mc12P200Id = purificationReagentsList benchId myTools 24
 
             //Reads in copy of Word Doc and starts processing
             let docArray = File.ReadAllBytes(purificationsForm)
@@ -97,20 +106,20 @@ let purificationStart (inputParams : string list) (purificationsForm : string) (
             (fillingPurificationLots purificationBody 0 10 1 0 0).Text <- nanoDropId
             (fillingPurificationLots purificationBody 0 10 2 0 0).Text <- nanoDropCalibration
             (fillingPurificationLots purificationBody 0 12 0 0 0).Text <- p1000
-            (fillingPurificationLots purificationBody 0 12 1 0 1).Text <- p1000Id
-            (fillingPurificationLots purificationBody 0 12 2 0 0).Text <- pipetteCal
+            (fillingPurificationLots purificationBody 0 12 1 0 0).Text <- p1000Id
+            (fillingPurificationLots purificationBody 0 12 2 0 0).Text <- pipetteCalibration
             (fillingPurificationLots purificationBody 0 13 0 0 0).Text <- p200
-            (fillingPurificationLots purificationBody 0 13 1 0 1).Text <- p200Id
-            (fillingPurificationLots purificationBody 0 13 2 0 0).Text <- pipetteCal
+            (fillingPurificationLots purificationBody 0 13 1 0 0).Text <- p200Id
+            (fillingPurificationLots purificationBody 0 13 2 0 0).Text <- pipetteCalibration
             (fillingPurificationLots purificationBody 0 14 0 0 0).Text <- p20
-            (fillingPurificationLots purificationBody 0 14 1 0 1).Text <- p20Id
-            (fillingPurificationLots purificationBody 0 14 2 0 0).Text <- pipetteCal
+            (fillingPurificationLots purificationBody 0 14 1 0 0).Text <- p20Id
+            (fillingPurificationLots purificationBody 0 14 2 0 0).Text <- pipetteCalibration
             (fillingPurificationLots purificationBody 0 15 0 0 0).Text <- p2000
-            (fillingPurificationLots purificationBody 0 15 1 0 1).Text <- p2000Id
-            (fillingPurificationLots purificationBody 0 15 2 0 0).Text <- pipetteCal
+            (fillingPurificationLots purificationBody 0 15 1 0 0).Text <- p2000Id
+            (fillingPurificationLots purificationBody 0 15 2 0 0).Text <- pipetteCalibration
             (fillingPurificationLots purificationBody 0 16 0 0 0).Text <- p2
-            (fillingPurificationLots purificationBody 0 16 1 0 1).Text <- p2Id
-            (fillingPurificationLots purificationBody 0 16 2 0 0).Text <- pipetteCal
+            (fillingPurificationLots purificationBody 0 16 1 0 0).Text <- p2Id
+            (fillingPurificationLots purificationBody 0 16 2 0 0).Text <- pipetteCalibration
 
               
             let volume = System.Math.Ceiling(theoreticalVolume (scale |> float) (geneNumber |> float))

@@ -18,23 +18,31 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
     let benchInput = Console.ReadLine ()
 
     let pipetteCalibration = ligationsListFunction benchInput myTools 2
+    let p1000 = ligationsListFunction benchInput myTools 3
     let p1000Id = ligationsListFunction benchInput myTools 4
+    let p200 = ligationsListFunction benchInput myTools 5
     let p200Id = ligationsListFunction benchInput myTools 6
-    let p20Id = ligationsListFunction benchInput myTools 8
-    let p2Id = ligationsListFunction benchInput myTools 10
-    let p2000Id = ligationsListFunction benchInput myTools 12
-    let mc8P20Id = ligationsListFunction benchInput myTools 14
-    let mc12P20Id = ligationsListFunction benchInput myTools 16
-    let mc8P200Id = ligationsListFunction benchInput myTools 18
-    let mc12P200Id = ligationsListFunction benchInput myTools 20
+    let p100 = ligationsListFunction benchInput myTools 7
+    let p100Id = ligationsListFunction benchInput myTools 8
+    let p20 = ligationsListFunction benchInput myTools 9
+    let p20Id = ligationsListFunction benchInput myTools 10
+    let p10 = ligationsListFunction benchInput myTools 11
+    let p10Id = ligationsListFunction benchInput myTools 12
+    let p2 = ligationsListFunction benchInput myTools 13
+    let p2Id = ligationsListFunction benchInput myTools 14
+    let p2000 = ligationsListFunction benchInput myTools 15
+    let p2000Id = ligationsListFunction benchInput myTools 16
+    let mc8P20Id = ligationsListFunction benchInput myTools 18
+    let mc12P20Id = ligationsListFunction benchInput myTools 22
+    let mc8P200Id = ligationsListFunction benchInput myTools 20
+    let mc12P200Id = ligationsListFunction benchInput myTools 24
 
+    Console.WriteLine "Which reagents will you use?"
+    let reagentsInput = Console.ReadLine ()
 
         
     
     for param in inputParams do
-
-        Console.WriteLine "Which reagents will you use?"
-        let reagentsInput = Console.ReadLine ()
 
         let lot, csName, species, customer, geneNumber, scale, formulation, shipDate = codesetIdentifiers param ghost
         
