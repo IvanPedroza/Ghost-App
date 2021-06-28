@@ -139,6 +139,23 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
                     | _ when rwScale = "1" -> rwMmVolume * 4.0 |> string
                     | _ when rwScale = "2" -> rwMmVolume * 5.0 |> string
                     | _ when rwScale = "3" -> (rwMmVolume * 4.0 |> string) + "|" + (rwMmVolume * 5.0 |> string)
+            let rwGeneNorm = 
+                match rwScale with 
+                    | _ when rwScale = "0" -> 1.0
+                    | _ when rwScale = "1" -> 4.0
+                    | _ when rwScale = "2" -> 5.0
+                    | _ when rwScale = "3" -> 5.0 
+
+
+
+            if not (scale = lastLotScale) then 
+                let scaling = ((scale |> float) / (lastLotScale |> float))
+                let scaledGenes = (rwNumber |> float) * scaling
+                let rwGeneNormalization = scaledGenes * rwGeneNorm
+                myList <- rwGeneNormalization :: myList
+            else 
+                let rwGeneNormalization = (rwNumber |> float) * rwGeneNorm
+                myList <- rwGeneNormalization :: myList
 
 
             (ligationsCsInfoHeader ligationsBody 2 9).Text <- rwNumber + "/" + geneNumber
@@ -184,7 +201,11 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
             else 
                 myList <- (geneNumber |> float) :: myList
 
-        let plateTotal = System.Math.Ceiling((geneNumber |> float) / 96.0) |> int
+        let plateTotal = 
+            if param.EndsWith("RW", StringComparison.InvariantCultureIgnoreCase) then
+                1
+            else
+                System.Math.Ceiling((geneNumber |> float) / 96.0) |> int
         let iterator = [1..9]
         let mutable naList = []
         for i in iterator do 

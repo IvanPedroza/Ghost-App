@@ -24,15 +24,16 @@ let gelQcStart(inputParams : string list) (gelForm : string) (ghost : ExcelWorks
         let plateCount = System.Math.Floor((geneNumber|>float) / 96.0)
 
         let totalGenesToGel =
-            if plateCount > 1.0 then 
-                let unGeledGenes = 96.0 * plateCount
-                let genesToGel = (geneNumber|>float) - unGeledGenes
-                genesToGel.ToString() + "/" + geneNumber
+            if param.EndsWith("RW", StringComparison.InvariantCultureIgnoreCase) then 
+                Console.WriteLine ("How many probes are you geling for " + param + "?")
+                let genesToGel = Console.ReadLine ()
+                genesToGel + "/" + geneNumber
+           
             else 
-                if param.EndsWith("RW", StringComparison.InvariantCultureIgnoreCase) then 
-                    Console.WriteLine ("How many probes are you geling for " + param + "?")
-                    let genesToGel = Console.ReadLine ()
-                    genesToGel + "/" + geneNumber
+                if plateCount > 1.0 then 
+                    let unGeledGenes = 96.0 * plateCount
+                    let genesToGel = (geneNumber|>float) - unGeledGenes
+                    genesToGel.ToString() + "/" + geneNumber
                 else
                     geneNumber
 

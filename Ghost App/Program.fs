@@ -51,7 +51,16 @@ let main argv =
     let inputSplit = input.Split(' ')
     let inputParams = [for i in inputSplit do i.ToUpper()]
 
-    Console.WriteLine "Which process are you conducting?"
+    Console.WriteLine "Enter the number of the process you are conducting?"
+    Console.WriteLine ( 
+   "
+    1 - Ligate 
+    2 - Gel 
+    3 - Zag
+    4 - Re-Qc 
+    5 - Purify
+    ")
+
     let processInput = Console.ReadLine ()
 
     use __ = SentrySdk.Init ( fun o ->
@@ -99,22 +108,22 @@ let main argv =
     //Starts reading values of excel and stores it in "param"
     try
         
-        if processInput.Equals("ligate", StringComparison.InvariantCultureIgnoreCase) then 
+        if processInput.Equals("1", StringComparison.InvariantCultureIgnoreCase) then 
             Ligations.ligationStart inputParams rqstform ligationForm ghost oligoStamps myTools
                
 
-        elif processInput.Equals("gelqc", StringComparison.InvariantCultureIgnoreCase) then 
+        elif processInput.Equals("2", StringComparison.InvariantCultureIgnoreCase) then 
             GelQC.gelQcStart inputParams gelForm ghost myTools
          
 
-        elif processInput.Equals("zagqc", StringComparison.InvariantCultureIgnoreCase) then
+        elif processInput.Equals("3", StringComparison.InvariantCultureIgnoreCase) then
             ZagQC.zagStart inputParams zagForm ghost myTools
 
-        elif processInput.Equals("reqc", StringComparison.InvariantCultureIgnoreCase) then 
+        elif processInput.Equals("4", StringComparison.InvariantCultureIgnoreCase) then 
             ReQC.reQcStart inputParams reQcForm ghost myTools
 
 
-        elif processInput.Equals("purify", StringComparison.InvariantCultureIgnoreCase) then
+        elif processInput.Equals("5", StringComparison.InvariantCultureIgnoreCase) then
             Purifications.purificationStart inputParams purificationForm ghost myTools
 
         else 
