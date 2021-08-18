@@ -16,8 +16,8 @@ let zagStart (inputParams : string list) (zagForm : string) (ghost : ExcelWorksh
     let plateInput = Console.ReadLine() |> float
 
 
-    Console.WriteLine "Which reagents will you use?"
-    let reagentsInput = Console.ReadLine ()
+    //Console.WriteLine "Which reagents will you use?"
+    let reagentsInput = "gpzag"//Console.ReadLine ()
     
     let gelVolume = (((plateInput - 1.0) * 5.0) + 20.0).ToString()
     let ureaVolume = (plateInput * 2.625).ToString()

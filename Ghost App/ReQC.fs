@@ -14,7 +14,7 @@ let reQcStart(inputParams : string list) (reQcForm : string) (ghost : ExcelWorks
         Console.WriteLine ("How many probes are being reQC-ed for " + param)
         let reQcGeneNumber = Console.ReadLine()
 
-        let negative = gelsListFunction "gelqc" myTools 2
+        let negative = gelsListFunction "gpgelqc" myTools 2
 
         let docArray = File.ReadAllBytes(reQcForm)
         use _copyDoc = new MemoryStream(docArray)

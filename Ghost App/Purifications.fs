@@ -12,8 +12,8 @@ open PurificationHelpers
 let purificationStart (inputParams : string list) (purificationsForm : string) (ghost : ExcelWorksheet)(myTools : ExcelWorksheet) =
     
     let user = Environment.UserName
-    Console.WriteLine "Which reagents will you use?"
-    let reagentsInput = Console.ReadLine ()
+    //Console.WriteLine "Which reagents will you use?"
+    let reagentsInput = "purifications" //Console.ReadLine ()
 
     Console.WriteLine "What is the regen of the beads being used?"
     let regenNumber = Console.ReadLine ()

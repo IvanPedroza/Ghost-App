@@ -11,7 +11,7 @@ let gelQcStart(inputParams : string list) (gelForm : string) (ghost : ExcelWorks
     let user =  Environment.UserName 
     for param in inputParams do 
 
-        let negative = gelsListFunction "gelqc" myTools 2
+        let negative = gelsListFunction "gpgelqc" myTools 2
 
         let docArray = File.ReadAllBytes(gelForm)
         use _copyDoc = new MemoryStream(docArray)

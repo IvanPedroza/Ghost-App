@@ -37,8 +37,8 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
     let mc8P200Id = ligationsListFunction benchInput myTools 20
     let mc12P200Id = ligationsListFunction benchInput myTools 24
 
-    Console.WriteLine "Which reagents will you use?"
-    let reagentsInput = Console.ReadLine ()
+    //Console.WriteLine "Which reagents will you use?"
+    let reagentsInput = "gpligations" //Console.ReadLine ()
 
         
     
