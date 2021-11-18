@@ -84,7 +84,6 @@ let main argv =
     let ghost = package.Workbook.Worksheets.["Upstream - GP"]
 
     //Reading in excel file from path on oligo sheet
-    ExcelPackage.LicenseContext <- Nullable LicenseContext.NonCommercial
     let oligoInfo = new FileInfo("W:/Production/Probe Oligos/REMP Files/_Re-Rack Files/Rerack Status.xlsx")
     use oligoPackage = new ExcelPackage (oligoInfo)
     let oligoStamps = oligoPackage.Workbook.Worksheets.["CodeSet Archive"]
@@ -106,63 +105,33 @@ let main argv =
 
 
     //Starts reading values of excel and stores it in "param"
-    try
+   // try
         
-        if processInput.Equals("1", StringComparison.InvariantCultureIgnoreCase) then 
-            Ligations.ligationStart inputParams rqstform ligationForm ghost oligoStamps myTools
+    if processInput.Equals("1", StringComparison.InvariantCultureIgnoreCase) then 
+        Ligations.ligationStart inputParams rqstform ligationForm ghost oligoStamps myTools
                
 
-        elif processInput.Equals("2", StringComparison.InvariantCultureIgnoreCase) then 
-            GelQC.gelQcStart inputParams gelForm ghost myTools
+    elif processInput.Equals("2", StringComparison.InvariantCultureIgnoreCase) then 
+        GelQC.gelQcStart inputParams gelForm ghost myTools
          
 
-        elif processInput.Equals("3", StringComparison.InvariantCultureIgnoreCase) then
-            ZagQC.zagStart inputParams zagForm ghost myTools
+    elif processInput.Equals("3", StringComparison.InvariantCultureIgnoreCase) then
+        ZagQC.zagStart inputParams zagForm ghost myTools
 
-        elif processInput.Equals("4", StringComparison.InvariantCultureIgnoreCase) then 
-            ReQC.reQcStart inputParams reQcForm ghost myTools
+    elif processInput.Equals("4", StringComparison.InvariantCultureIgnoreCase) then 
+        ReQC.reQcStart inputParams reQcForm ghost myTools
 
 
-        elif processInput.Equals("5", StringComparison.InvariantCultureIgnoreCase) then
-            Purifications.purificationStart inputParams purificationForm ghost myTools
+    elif processInput.Equals("5", StringComparison.InvariantCultureIgnoreCase) then
+        Purifications.purificationStart inputParams purificationForm ghost myTools
 
-        else 
-            Console.WriteLine "Invalid Process Entry..."
+    else 
+        Console.WriteLine "Invalid Process Entry..."
 
 
     
-    with 
-        | ex ->
-            ex |> SentrySdk.CaptureException |> ignore
-
-
-           
-            for param in inputParams do 
-                let docs = pathsList user param
-
-                for each in docs do 
-                    if File.Exists(each) then 
-                        File.Delete(each)
-                        Console.WriteLine "User Error..."
-            
-    try
-        for param in inputParams do 
-            let docs = pathsList user param
-            for each in docs do 
-                if File.Exists(each) then 
-                    printDocuments each user
-                else 
-                    ignore()
-        
-                    
-    with 
-        | _ -> 
-            Console.WriteLine "Unable to print documents"
-            for param in inputParams do 
-                let docs = pathsList user param
-                for each in docs do 
-                    if File.Exists(each) then
-                        File.Delete(each)
+    //with 
+       
 
 
     0 // return an integer exit code
