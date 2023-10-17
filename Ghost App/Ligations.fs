@@ -9,15 +9,16 @@ open System.IO
 open System.Linq
 open HelperFunctions
 
-
+// Function used to fill out ligation batch records
 let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm : string) (ghost : ExcelWorksheet)(myTools : ExcelWorksheet) =
     let user =  Environment.UserName 
     let mutable myList = []   
 
+    // User interface
     Console.WriteLine "Which bench are you working at?"
     let benchInput = Console.ReadLine ()
 
-
+    // Used to retrieve equipment IDs from LIMS at the specified bench
     let p1000 = ligationsListFunction benchInput myTools 3
     let p1000Id = ligationsListFunction benchInput myTools 4
     let p200 = ligationsListFunction benchInput myTools 5
@@ -29,10 +30,12 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
     let mcP20 = ligationsListFunction benchInput myTools 11
     let mcP20Id = ligationsListFunction benchInput myTools 12
         
-    
-    for param in inputParams do
-        let reagentsInput = "gpligations"
 
+    // loop through the batch record for and fill out out for each of the specified builds
+    for param in inputParams do
+
+        // Pulls build information from customer request sheet
+        let reagentsInput = "gpligations"
         let lot, csName, species, customer, geneNumber, scale, formulation, shipDate = codesetIdentifiers param ghost
 
         //Reads in Word Doc
@@ -40,9 +43,7 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
         let lengthDox = docArray.Length
         use _copyDoc = new MemoryStream(docArray)
         use rqstDocument = WordprocessingDocument.Open(_copyDoc, true)
-      
         let rqstbody = rqstDocument.MainDocumentPart.Document.Body
-
         let codesetType = HelperFunctions.determineFormulation csName formulation
        
         //Formats the shipping date 
@@ -54,7 +55,7 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
                     let secondstring = shipDate.Substring(3,2).ToLower()
                     firststring + secondstring + (DateTime.Now.Year.ToString())
 
-        //Finds text for GP lot in word doc
+        //Finds text for GP lot in batch record
         (requestForms rqstbody 0 1 0 0).Text <- lot
         (requestForms rqstbody 0 1 1 0).Text <- csName
         (requestForms rqstbody 0 1 2 0).Text <- species
@@ -66,14 +67,15 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
         (rqstFormDropdowns rqstbody  2 0 0 0 0).Text <- formulation
    
 
-        //used to replace checked box text
+        // Repleaces checked box text
         let concentrationCheck = "☒" 
         (rqstFormDropdowns rqstbody 12 0 0 0 0).Text <- concentrationCheck
 
+        // Save Batch Record
         let rqstFormPath = "C:/Users/" + user + "/AppData/Local/Temp/ "+param + " Request Form" + ".docx"
         rqstDocument.SaveAs(rqstFormPath).Close() |> ignore
            
-        //Same as above but for reagents excel doc
+        // Pulls reagent information from LIMS
         let GlLot = ligationsListFunction reagentsInput myTools 2 
         let GlExp = ligationsListFunction reagentsInput myTools 3
         let T4BufferLot = ligationsListFunction reagentsInput myTools 4
@@ -88,13 +90,13 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
         let t4EnzymeLot = ligationsListFunction reagentsInput myTools 13
         let t4EnzymeExp = ligationsListFunction reagentsInput myTools 14
 
-        //Reads in Word Doc and starts processing a copy of it
+        // Reads in Word Doc and starts processing a copy of it
         let docArray = File.ReadAllBytes(ligationForm)
         use _copyDoc = new MemoryStream(docArray)
         use ligationDocument = WordprocessingDocument.Open(_copyDoc, true)
         let ligationsBody = ligationDocument.MainDocumentPart.Document.Body
 
-        //Find text in the docx table and assigns it string values
+        // Find text in the docx table and assigns it string values
         (ligationsCsInfoHeader ligationsBody 2 2).Text <- lot + " " + csName
         (ligationsCsInfoHeader ligationsBody 2 9).Text <- geneNumber
         (ligationsCsInfoHeader ligationsBody 2 16).Text <- scale
@@ -114,7 +116,7 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
         (ligationsTableFiller ligationsBody 0 8 2 0 0).Text <- t4EnzymeLot
         (ligationsTableFiller ligationsBody 0 8 3 0 0).Text <- t4EnzymeExp
               
-        //calculates reagent amounts and assigns calculations to the last parameter for reference
+        // Calculates reagent amounts and assigns calculations to the last parameter for reference
         let lastLot = inputParams.Last()
         let lastLotScale = ligationsListFunction lastLot ghost 7
               
@@ -136,6 +138,7 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
                 let x = "N/A"
                 naList <- x :: naList
 
+        // Fills batch record with text values for speficified reagents
         (ligationsTableFiller ligationsBody 0 11 1 0 1).Text <- naList.[7]
         (ligationsTableFiller ligationsBody 0 11 2 0 0).Text <- naList.[7]
         (ligationsTableFiller ligationsBody 0 12 1 0 1).Text <- naList.[6]
@@ -155,6 +158,8 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
 
         let oligo, ligator, buffer, bf2, atp, water, ligase, masterMix =   oligoStamp (scale |> float )
 
+        // Last batch record in the bulk being processed contains information about all build that were processed in this batch
+        // This block fills out information regarding bulked builds
         if param = lastLot then 
             let reactions = roundupbyfive (myList.Sum() * 1.1)
             let ligatorAdded = reactions * ligator
@@ -186,6 +191,6 @@ let ligationStart (inputParams : string list) (rqstForm : string) (ligationForm 
         (ligationsTableFiller ligationsBody 0 33 1 3 2).Text <- masterMix
         footnotes ligationsBody inputParams param
 
-       
+        // Save filled out document
         let ligationBatchRecordPath = "C:/Users/" + user + "/AppData/Local/Temp/ "+param + " Ligation Batch Record" + ".docx"
         ligationDocument.SaveAs(ligationBatchRecordPath).Close() |> ignore
