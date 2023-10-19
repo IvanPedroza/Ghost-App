@@ -7,22 +7,28 @@ open DocumentFormat.OpenXml.Packaging
 open System.IO
 open HelperFunctions
 
+// Function used to fill out Zero Agarose Gel Batch Record 
 let zagStart (inputParams : string list) (zagForm : string) (ghost : ExcelWorksheet)(myTools : ExcelWorksheet) =
+    // Gets current user for use in path and error logging
     let user =  Environment.UserName
+    //User Interface
     Console.WriteLine "How many plates are you running?"
     let plateInput = Console.ReadLine() |> float
-
     let input2 = "zagqc"
-    
+
+    // Calculates reagent volumes needed for ZAG run
     let gelVolume = (((plateInput - 1.0) * 5.0) + 20.0).ToString()
     let ureaVolume = (plateInput * 2.625).ToString()
     let diVolume = (plateInput * 315.0).ToString()
     let tenMerVolume = (plateInput * 60.0).ToString()
 
+    // Cycles through CS lots specifed and fills out a Batch Record for each of them
     for param in inputParams do
-         
+
+        // Reads in CS identifying information from LIMS
         let lot, csName, species, customer, geneNumber, scale, formulation, shipDate = (codesetIdentifiers param ghost)
 
+        // Reads in reagent lots from LIMS
         let gelLot = zagReagentsList input2 myTools 2 
         let sybrLot = zagReagentsList input2 myTools 3
         let ibLot = zagReagentsList input2 myTools 4
@@ -31,11 +37,13 @@ let zagStart (inputParams : string list) (zagForm : string) (ghost : ExcelWorksh
         let tenmerLot = zagReagentsList input2 myTools 7
         let mpLot = zagReagentsList input2 myTools 8 
 
+        // Reads in Batch Record template
         let docArray = File.ReadAllBytes(zagForm)
         use docCopy = new MemoryStream(docArray)
         use zagDocument = WordprocessingDocument.Open (docCopy, true)
         let zagBody = zagDocument.MainDocumentPart.Document.Body
 
+        // Calculates total number of PCR places being run for a specific CS
         let numberOfPlates = (geneNumber |> float) / 96.0 
         let totalPlates = Math.Ceiling(numberOfPlates)
         let lotPlates = 
@@ -56,14 +64,14 @@ let zagStart (inputParams : string list) (zagForm : string) (ghost : ExcelWorksh
                     "1 - " + (totalPlates - 1.0).ToString()
          
 
-        //CS lot identifier info and number of plates being run
+        // Fills out CS lot identifier info and number of plates being run
         (zagCsInfoHeader zagBody 1 5).Text <- lot + " " + csName
         (zagCsInfoHeader zagBody 1 13).Text <- lotPlates
         (zagCsInfoHeader zagBody 1 20).Text <- totalPlates |> string
         (zagCsInfoHeader zagBody 2 17).Text <- geneNumber |> string
         (zagCsInfoHeader zagBody 2 21).Text <- scale |> string
 
-        //finds cell of each reagent
+        // Fills out reagent lots used to QC this CS
         (zagLotNumberFiller zagBody 0 1 4 0).Text <- gelLot
         (zagLotNumberFiller zagBody 0 2 4 0).Text <- sybrLot
         (zagLotNumberFiller zagBody 0 3 4 0).Text <- ibLot
@@ -73,7 +81,7 @@ let zagStart (inputParams : string list) (zagForm : string) (ghost : ExcelWorksh
         (zagLotNumberFiller zagBody 0 8 4 0).Text <- mpLot
         (zagLotNumberFiller zagBody 0 9 4 0).Text <- "N/A"
 
-        //Calculations text and footnotes
+        // Fills out the columes of reagents used to QC this lot
         let gelCalculations = (zagCalculationsWriter zagBody 1 2 1 2 8)
         let gelFootNote = (writeFootNote zagBody 1 2 1 2 9)
         let sybrCalculations = (zagCalculationsWriter zagBody 1 2 1 4 6)
@@ -86,7 +94,7 @@ let zagStart (inputParams : string list) (zagForm : string) (ghost : ExcelWorksh
         let tenMerFootNote = (writeFootNote zagBody 1 7 1 6 12)
          
 
-        //Adds footnote to calculations section and comment section
+        // Adds footnote to calculations section and comment section
         let firstLot = inputParams.[0]
         let restOfList = inputParams.[1..inputParams.Length-1]
         if inputParams.Length > 1 then       
@@ -120,5 +128,6 @@ let zagStart (inputParams : string list) (zagForm : string) (ghost : ExcelWorksh
             diFootNote.Text <- ""
             tenMerFootNote.Text <- ""
 
+        // Saves document in temo folder for printing and deleting 
         let zagBatchRecordPath = "C:/Users/" + user + "/AppData/Local/Temp/ "+param + " Zag Batch Record" + ".docx"
         zagDocument.SaveAs(zagBatchRecordPath).Close()
