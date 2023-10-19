@@ -8,25 +8,25 @@ open DocumentFormat.OpenXml.Wordprocessing
 open System.IO
 open HelperFunctions
 
-
+// Function used to fill out purification Batch Records
 let purificationStart (inputParams : string list) (purificationsForm : string) (ghost : ExcelWorksheet)(myTools : ExcelWorksheet) =
-    
+    // Gets logged user for use in path and error logging
     let user = Environment.UserName
     //Console.WriteLine "Which reagents will you use?"
     let reagentsInput = "purifications" //Console.ReadLine ()
-
+    //User Interface
     Console.WriteLine "What is the regen of the beads being used?"
     let regenNumber = Console.ReadLine ()
-
     Console.WriteLine "At which bench are you working?"
     let benchId = Console.ReadLine ()
 
+    // Cycles through CS build IDs and fills out all reagent info from LIMS
     for param in inputParams do
               
-            //Takes value of each cell of the row in which the input lies and stores it for use in filling out Word Doc
+            // Takes value of each cell of the row in which the input lies and stores it for use in filling out Word Doc
             let lot, csName, species, customer, geneNumber, scale, formulation, shipDate = (codesetIdentifiers param ghost)
 
-            //Reading from reagents sheet and loking for reagent box input
+            // Reading reagents from LIMS and loking for reagent box input
             let sspeLot = purificationReagentsList  reagentsInput myTools  2
             let sspeExp = purificationReagentsList  reagentsInput myTools  3
             let sspeUbd = purificationReagentsList  reagentsInput myTools  4
@@ -47,7 +47,7 @@ let purificationStart (inputParams : string list) (purificationsForm : string) (
             let nanoDropId = purificationReagentsList  reagentsInput myTools  19
             let nanoDropCalibration = purificationReagentsList  reagentsInput myTools  20
 
-            //Reading from reagents sheet and looking for bench input to find pipettes associated with that bench
+            // Reading bench equipment IDs from LIMS to find pipettes associated with bench specified by user
             let pipetteCal = purificationReagentsList benchId myTools  2
             let p1000 = purificationReagentsList benchId myTools  3
             let p1000Id = purificationReagentsList benchId myTools  4
@@ -60,18 +60,18 @@ let purificationStart (inputParams : string list) (purificationsForm : string) (
             let p2 = purificationReagentsList benchId myTools  11
             let p2Id = purificationReagentsList benchId myTools  12
 
-            //Reads in copy of Word Doc and starts processing
+            // Reads in copy of Batch Record template and starts processing
             let docArray = File.ReadAllBytes(purificationsForm)
             use docCopy = new MemoryStream(docArray)
             use purificationDocument = WordprocessingDocument.Open (docCopy, true)
             let purificationBody = purificationDocument.MainDocumentPart.Document.Body
 
-            //Fills out CS identifying info
+            // Fills out CS identifying info
             (purificationCsInfoHeader purificationBody 1 5).Text <- lot + " " + csName
             (purificationCsInfoHeader purificationBody 1 13).Text <- geneNumber |> string
             (purificationCsInfoHeader purificationBody 1 19).Text <- scale |> string
 
-            //Fills reagent and equipment info 
+            // Fills reagent and equipment info 
             (fillingPurificationLots purificationBody 0 1 2 0 0).Text <- lot
             (fillingPurificationLots purificationBody 0 1 3 0 0).Text <- "N/A"
             (fillingPurificationLots purificationBody 0 2 2 0 0).Text <- sspeLot
@@ -112,15 +112,14 @@ let purificationStart (inputParams : string list) (purificationsForm : string) (
             (fillingPurificationLots purificationBody 0 16 1 0 1).Text <- p2Id
             (fillingPurificationLots purificationBody 0 16 2 0 0).Text <- pipetteCal
 
-              
+
+            // Calculates reagent volumes needed for chemistry reactions
             let volume = System.Math.Ceiling(theoreticalVolume (scale |> float) (geneNumber |> float))
             let oneXVolume = System.Math.Round(((volume * 0.95) * 1.2), 1) 
             let sspeVolume = System.Math.Round((oneXVolume / 20.0), 1)
             let tweenVolume = System.Math.Round((oneXVolume / 100.0), 1)
             let water = System.Math.Round((oneXVolume - volume - sspeVolume - tweenVolume), 1)
             let calculatingBeadVolume = (oneXVolume * 2.0)
-
-
             let beads = 
                 if(calculatingBeadVolume % 100.0) = 0.0 then
                     (oneXVolume * 2.0).ToString()
@@ -136,7 +135,8 @@ let purificationStart (inputParams : string list) (purificationsForm : string) (
                 else
                     ((((((scale |> float) - 1.0) * 1000.0) * 0.6)) / 3.6)
             let elutionBuffer = (System.Math.Ceiling(buffer)).ToString()
-              
+
+            // Fills out Batch Record with reagent quantities for purification chemistry
             (writingCalculations purificationBody 1 4 1 8 2).Text <- volume.ToString()
             (writingCalculations purificationBody 1 5 1 0 1).Text <- oneXVolume.ToString()
             (writingCalculations purificationBody 1 8 1 0 5).Text <- volume.ToString()
@@ -151,5 +151,6 @@ let purificationStart (inputParams : string list) (purificationsForm : string) (
             (writingCalculations purificationBody 1 22 1 2 2).Text <- beads
             (writingCalculations purificationBody 1 25 1 2 2).Text <- elutionBuffer
 
+            // Saves document in temp directory for printing and subsequent deletion
             let purificationFormPath = "C:/Users/" + user + "/AppData/Local/Temp/ "+param + " Purification Form" + ".docx"
             purificationDocument.SaveAs(purificationFormPath).Close() |> ignore
