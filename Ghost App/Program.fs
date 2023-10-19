@@ -11,6 +11,7 @@ open System.Diagnostics
 open Sentry
 open HelperFunctions
 
+// Function used to save the filled out forms to temp folder for printing before deleting
 let pathsList (user : string) (param : string) = 
     [
     "C:/Users/" + user + "/AppData/Local/Temp/ "+param + " Request Form" + ".docx"
@@ -20,7 +21,7 @@ let pathsList (user : string) (param : string) =
     "C:/Users/" + user + "/AppData/Local/Temp/ "+param + " Purification Form" + ".docx"
     ]
 
-
+// Function for printing Batch Record to default printer
 let printDocuments (path : string) =
     let printing = new Process()
     printing.StartInfo.FileName <- path
@@ -33,13 +34,14 @@ let printDocuments (path : string) =
 
     File.Delete(path)
 
+// Program entry point
 [<EntryPoint>]
 let main argv =
 
-    //Reading in exel doc
+    // Function reading in Excel document form LIMS
     ExcelPackage.LicenseContext <- Nullable LicenseContext.NonCommercial  
     
-    //User interface - input will take string as input
+    // User interface - input will take string as input
     Console.WriteLine "What GP will you work on?"
     let input = Console.ReadLine ()
     let inputSplit = input.Split(' ')
@@ -48,6 +50,7 @@ let main argv =
     Console.WriteLine "Which process are you conducting?"
     let processInput = Console.ReadLine ()
 
+    // Error logging using SentryIO
     use __ = SentrySdk.Init ( fun o ->
            o.Dsn <-  "https://d1553cf78c164e5d9813ca11cc417d80@o561151.ingest.sentry.io/5697684"
            o.SendDefaultPii <- true
@@ -62,18 +65,18 @@ let main argv =
 
     
     
-    //Reading in excel file from path on Reporter Probe sheet
+    // Funtion reading in Excel file from path on Reporter Probe sheet of LIMS
     ExcelPackage.LicenseContext <- Nullable LicenseContext.NonCommercial
     let fileInfo = new FileInfo("W:/Production/Reporter requests/CODESET TRACKERS/CodeSet Status.xlsx")
     use package = new ExcelPackage (fileInfo)
     let ghost = package.Workbook.Worksheets.["Upstream - GP"]
 
-    //Reading in reagents excel book
+    // Funtion reading in reagents Excel sheet of LIMS
     let reagentsInfo = new FileInfo("S:/ip/reagentsandtools.xlsx")
     use reagentsPackage = new ExcelPackage (reagentsInfo)
     let myTools = reagentsPackage.Workbook.Worksheets.["tools"]
 
-    //Documents
+    // Blank Batch Record template forms for filling
     let rqstform = "C:/Users/ipedroza/source/repos/FRM-M0206 Ghost Probe Synthesis Request.docx"
     let ligationForm = "C:/Users/ipedroza/source/repos/Formatted Forms/FRM-M0051-11_Ghost Probe Ligation using Excess Ghost Probe Oligo.docx"
     let gelForm = "C:/Users/ipedroza/source/repos/FRM-M0217-04_RUO Gel Electrophoresis QC for Ghost Probe Ligations Batch Record.docx"
@@ -81,10 +84,12 @@ let main argv =
     let reQcForm = "C:/Users/ipedroza/source/repos/FRM-M0183-03_Ghost Probe Re-QC.docx"
     let purificationForm = "C:/Users/ipedroza/source/repos/FRM-M0052-10 Purification of Ghost Probes with F-MODBs.docx"
 
+    // Logged in user -- used for saving to temp folder and error logging
     let user = Environment.UserName
 
 
-    //Starts reading values of excel and stores it in "param"
+    // Starts reading values of Excel and stores it in "param"
+    // If error occurs, it is logged on Sentry IO
     try
         
         if processInput.Equals("ligate", StringComparison.InvariantCultureIgnoreCase) then 
@@ -123,7 +128,8 @@ let main argv =
                     if File.Exists(each) then 
                         File.Delete(each)
                         Console.WriteLine "User Error..."
-            
+
+    // Tries to print document to default printer -- notifies user when error occurs
     try
         for param in inputParams do 
             let docs = pathsList user param
