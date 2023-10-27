@@ -75,4 +75,4 @@ If you'd like to contribute to this project, please follow these steps:
 
 ## License
 
-This program is open-source and available under the [MIT License]([LICENSE](https://github.com/IvanPedroza/Ghost-App/blob/master/LICENSE.md)https://github.com/IvanPedroza/Ghost-App/blob/master/LICENSE.md).
+This program is open-source and available under the [MIT License](https://github.com/IvanPedroza/Ghost-App/blob/master/LICENSE.md).
